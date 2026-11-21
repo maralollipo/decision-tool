@@ -1,0 +1,861 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Hold The Sneeze</title>
+<style>
+  :root {
+    --paper: #f4ecd8;
+    --ink: #1d1a16;
+    --accent: #e4572e;
+    --bg: #17142a;
+    --btn: #ffd23f;
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; height: 100%; background: var(--bg); color: #fff; overflow: hidden;
+    font-family: "Trebuchet MS", "Comic Sans MS", system-ui, sans-serif; user-select: none; -webkit-user-select: none; }
+  #wrap { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
+    width: min(100vw, calc(100vh * 16 / 9)); aspect-ratio: 16 / 9; }
+  canvas { width: 100%; height: 100%; display: block; border-radius: 10px; background: #000; }
+  .overlay { position: absolute; inset: 0; display: none; align-items: center; justify-content: center;
+    background: rgba(10, 8, 25, .72); border-radius: 10px; padding: 16px; }
+  .overlay.show { display: flex; }
+  .panel { background: #2a2350; border: 4px solid #fff; border-radius: 18px; padding: clamp(14px, 3vw, 30px);
+    max-width: 720px; width: 100%; text-align: center; box-shadow: 0 10px 0 #0006; max-height: 100%; overflow: auto; }
+  h1 { font-size: clamp(30px, 7vw, 72px); margin: 0 0 6px; line-height: 1; color: var(--btn);
+    text-shadow: 4px 4px 0 var(--accent), 8px 8px 0 #000; letter-spacing: 1px; }
+  h2 { font-size: clamp(20px, 3.6vw, 34px); margin: 0 0 10px; color: var(--btn); }
+  p { font-size: clamp(14px, 2vw, 19px); line-height: 1.4; margin: 8px 0; }
+  .small { opacity: .8; font-size: clamp(12px, 1.6vw, 15px); }
+  button.big { font: inherit; font-size: clamp(16px, 2.4vw, 24px); font-weight: bold; margin-top: 14px; padding: 12px 26px;
+    border: 3px solid #000; border-radius: 14px; background: var(--btn); color: #000; cursor: pointer;
+    box-shadow: 0 6px 0 #000; transition: transform .05s; }
+  button.big:active { transform: translateY(4px); box-shadow: 0 2px 0 #000; }
+  kbd { background: #fff; color: #000; border-radius: 5px; padding: 1px 7px; font-family: monospace; font-weight: bold;
+    box-shadow: 0 2px 0 #999; }
+  /* newspaper */
+  .paper { background: var(--paper); color: var(--ink); border: 0; font-family: Georgia, "Times New Roman", serif;
+    box-shadow: 0 10px 0 #0008; transform: rotate(-1.2deg); }
+  .masthead { font-family: "Old English Text MT", Georgia, serif; font-size: clamp(24px, 4.5vw, 46px); font-weight: bold;
+    border-bottom: 3px double var(--ink); padding-bottom: 4px; }
+  .dateline { display: flex; justify-content: space-between; font-size: clamp(10px, 1.4vw, 13px);
+    border-bottom: 1px solid var(--ink); padding: 3px 0; margin-bottom: 10px; text-transform: uppercase; }
+  .headline { font-size: clamp(20px, 3.8vw, 38px); font-weight: 900; line-height: 1.05; margin: 8px 0; text-transform: uppercase; }
+  .sub { font-style: italic; font-size: clamp(14px, 2vw, 19px); }
+  .stamp { display: inline-block; margin-top: 8px; padding: 4px 12px; border: 3px solid; border-radius: 6px;
+    font-family: "Trebuchet MS", sans-serif; font-weight: bold; transform: rotate(-4deg); font-size: clamp(13px, 1.8vw, 18px); }
+  .stamp.win { color: #1b7f3b; } .stamp.lose { color: #c0392b; }
+  .paper button.big { font-family: "Trebuchet MS", sans-serif; }
+  .list { text-align: left; margin: 6px 0; padding: 0; list-style: none; }
+  .list li { border-bottom: 1px dashed #0004; padding: 5px 0; font-size: clamp(12px, 1.6vw, 15px); }
+  .list b { text-transform: uppercase; }
+  /* QTE */
+  #qte { position: absolute; left: 50%; top: 36%; transform: translateX(-50%); display: none; z-index: 5;
+    background: var(--btn); color: #000; border: 4px solid #000; border-radius: 16px; padding: 8px 18px; text-align: center;
+    font-weight: bold; box-shadow: 0 6px 0 #000; cursor: pointer; animation: wob .3s infinite alternate; max-width: 90%; }
+  #qte.show { display: block; }
+  #qte .k { font-size: clamp(22px, 4vw, 40px); }
+  #qte .bar { height: 6px; background: #000; border-radius: 3px; margin-top: 4px; transform-origin: left; }
+  @keyframes wob { from { transform: translateX(-50%) rotate(-2deg); } to { transform: translateX(-50%) rotate(2deg) scale(1.04); } }
+  /* touch */
+  #touch { position: absolute; inset: auto 0 0 0; display: none; justify-content: space-between; padding: 10px; pointer-events: none; z-index: 4; }
+  #touch.show { display: flex; }
+  #touch .grp { display: flex; gap: 10px; pointer-events: auto; }
+  #touch button { pointer-events: auto; font: inherit; font-weight: bold; font-size: clamp(16px, 3vw, 24px); color: #000;
+    background: #fffc; border: 3px solid #000; border-radius: 50%; width: clamp(54px, 10vw, 84px); height: clamp(54px, 10vw, 84px);
+    touch-action: none; }
+  #touch button.pinch { border-radius: 18px; width: clamp(100px, 18vw, 150px); background: #ffd23fdd; }
+  #touch button.on { background: var(--accent); color: #fff; }
+  #mute { position: absolute; right: 10px; top: 10px; z-index: 6; font-size: 20px; background: #0006; color: #fff;
+    border: 2px solid #fff8; border-radius: 10px; padding: 2px 8px; cursor: pointer; }
+</style>
+</head>
+<body>
+<div id="wrap">
+  <canvas id="c" width="960" height="540"></canvas>
+  <button id="mute" title="Mute (M)">🔊</button>
+
+  <div id="title" class="overlay show">
+    <div class="panel">
+      <h1>HOLD THE<br>SNEEZE</h1>
+      <p><b>Six situations. One nose. Zero dignity.</b></p>
+      <p class="small">Your nose is tickled. The room is silent. Everyone is watching.<br>
+        Survive each scene without sneezing… or don't, and read about it in tomorrow's paper.</p>
+      <p><kbd>←</kbd> <kbd>→</kbd> lean away from tickly things<br>
+         hold <kbd>SPACE</kbd> to pinch your nose <span class="small">(builds PRESSURE — careful, it has to go somewhere)</span><br>
+         press the <kbd>?</kbd> key that pops up to <b>distract yourself</b></p>
+      <button class="big" id="playBtn">Breathe in (don't)</button>
+      <p class="small">Sound on recommended. 🔊 &nbsp;·&nbsp; <kbd>M</kbd> mutes.</p>
+    </div>
+  </div>
+
+  <div id="card" class="overlay"><div class="panel" id="cardPanel"></div></div>
+
+  <div id="qte"><div>DISTRACT YOURSELF! Press</div><div class="k" id="qteKey">K</div>
+    <div class="small" id="qteText">think about taxes</div><div class="bar" id="qteBar"></div></div>
+
+  <div id="touch">
+    <div class="grp"><button data-k="left">◀</button><button data-k="right">▶</button></div>
+    <div class="grp"><button data-k="pinch" class="pinch">PINCH 🤏</button></div>
+  </div>
+</div>
+
+<script>
+(() => {
+'use strict';
+const W = 960, H = 540;
+const cv = document.getElementById('c');
+const ctx = cv.getContext('2d');
+const EMOJI = '"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif';
+const $ = id => document.getElementById(id);
+const rand = (a, b) => a + Math.random() * (b - a);
+const pick = arr => arr[Math.floor(Math.random() * arr.length)];
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+function mulberry(a) { return function () { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a);
+  t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+
+function resize() {
+  const dpr = Math.min(2, window.devicePixelRatio || 1);
+  cv.width = W * dpr; cv.height = H * dpr;
+}
+window.addEventListener('resize', resize); resize();
+
+/* ---------------- AUDIO ---------------- */
+let AC = null, muted = false;
+function ac() {
+  if (!AC) { try { AC = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { AC = null; } }
+  if (AC && AC.state === 'suspended') AC.resume();
+  return AC;
+}
+function tone(f1, f2, dur, type = 'sine', vol = .15, delay = 0) {
+  const a = ac(); if (!a || muted) return;
+  const t0 = a.currentTime + delay;
+  const o = a.createOscillator(), g = a.createGain();
+  o.type = type; o.frequency.setValueAtTime(f1, t0); o.frequency.exponentialRampToValueAtTime(Math.max(1, f2), t0 + dur);
+  g.gain.setValueAtTime(0.0001, t0); g.gain.exponentialRampToValueAtTime(vol, t0 + 0.02);
+  g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+  o.connect(g).connect(a.destination); o.start(t0); o.stop(t0 + dur + .05);
+}
+function noise(dur, f1, f2, vol = .5, delay = 0) {
+  const a = ac(); if (!a || muted) return;
+  const t0 = a.currentTime + delay;
+  const buf = a.createBuffer(1, Math.floor(a.sampleRate * dur), a.sampleRate);
+  const d = buf.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+  const s = a.createBufferSource(); s.buffer = buf;
+  const f = a.createBiquadFilter(); f.type = 'bandpass'; f.Q.value = 1.2;
+  f.frequency.setValueAtTime(f1, t0); f.frequency.exponentialRampToValueAtTime(f2, t0 + dur);
+  const g = a.createGain(); g.gain.setValueAtTime(vol, t0); g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+  s.connect(f).connect(g).connect(a.destination); s.start(t0); s.stop(t0 + dur);
+}
+const sfx = {
+  ah(n) { tone(200 + n * 70, 260 + n * 110, .32 + n * .06, 'sawtooth', .05); tone(400 + n * 140, 520 + n * 200, .3, 'triangle', .03); },
+  choo() { noise(.15, 1500, 3000, .5); noise(1.1, 4000, 300, .9, .08); tone(140, 35, .7, 'sine', .6, .05); },
+  ear() { tone(700, 2600, 1.4, 'square', .06); tone(1100, 3400, 1.4, 'triangle', .07); noise(1.2, 6000, 2000, .25); },
+  tickle() { tone(1500 + Math.random() * 700, 2400, .09, 'triangle', .05); },
+  good() { tone(660, 990, .1, 'sine', .14); tone(990, 1320, .14, 'sine', .12, .09); },
+  bad() { tone(160, 90, .3, 'square', .08); },
+  boing() { tone(180, 700, .25, 'sine', .15); },
+  win() { [523, 659, 784, 1046].forEach((f, i) => tone(f, f, .18, 'triangle', .12, i * .12)); },
+  squeak() { tone(900, 1300, .06, 'square', .03); },
+};
+function say(text) {
+  if (muted || !('speechSynthesis' in window)) return;
+  try { speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(text); u.rate = 1.0; u.pitch = .7; speechSynthesis.speak(u); } catch (e) {}
+}
+
+/* ---------------- DRAW HELPERS ---------------- */
+function rr(x, y, w, h, r) { ctx.beginPath(); ctx.roundRect ? ctx.roundRect(x, y, w, h, r) : ctx.rect(x, y, w, h); }
+function emoji(e, x, y, size, rot = 0) {
+  ctx.save(); ctx.translate(x, y); if (rot) ctx.rotate(rot);
+  ctx.font = `${size}px ${EMOJI}`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(e, 0, 0); ctx.restore();
+}
+function text(t, x, y, size, col = '#fff', align = 'center', stroke = '#000', weight = 'bold') {
+  ctx.font = `${weight} ${size}px "Trebuchet MS","Comic Sans MS",sans-serif`; ctx.textAlign = align; ctx.textBaseline = 'middle';
+  if (stroke) { ctx.lineWidth = Math.max(3, size / 6); ctx.strokeStyle = stroke; ctx.lineJoin = 'round'; ctx.strokeText(t, x, y); }
+  ctx.fillStyle = col; ctx.fillText(t, x, y);
+}
+function wrapLines(t, maxW, size) {
+  ctx.font = `bold ${size}px "Trebuchet MS",sans-serif`;
+  const words = t.split(' '), lines = []; let cur = '';
+  for (const w of words) { const test = cur ? cur + ' ' + w : w; if (ctx.measureText(test).width > maxW && cur) { lines.push(cur); cur = w; } else cur = test; }
+  if (cur) lines.push(cur); return lines;
+}
+function bubble(t, x, y, tail = 'down') {
+  const size = 17, lines = wrapLines(t, 240, size);
+  ctx.font = `bold ${size}px "Trebuchet MS",sans-serif`;
+  const w = Math.max(...lines.map(l => ctx.measureText(l).width)) + 24, h = lines.length * 22 + 16;
+  let bx = clamp(x - w / 2, 8, W - w - 8), by = y - h - 16;
+  if (by < 70) by = 70;
+  ctx.fillStyle = '#fff'; ctx.strokeStyle = '#000'; ctx.lineWidth = 3;
+  rr(bx, by, w, h, 12); ctx.fill(); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(x - 8, by + h - 1); ctx.lineTo(x, by + h + 14); ctx.lineTo(x + 8, by + h - 1); ctx.closePath();
+  ctx.fill(); ctx.stroke(); ctx.fillStyle = '#fff'; ctx.fillRect(x - 6, by + h - 4, 12, 5);
+  ctx.fillStyle = '#000'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  lines.forEach((l, i) => ctx.fillText(l, bx + w / 2, by + 16 + i * 22));
+}
+function dustBunny(x, y, r, t) {
+  ctx.save(); ctx.translate(x, y); ctx.rotate(Math.sin(t * 3) * .3);
+  ctx.fillStyle = '#9a948a';
+  for (let i = 0; i < 9; i++) { const a = i / 9 * Math.PI * 2; ctx.beginPath(); ctx.arc(Math.cos(a) * r * .6, Math.sin(a) * r * .6, r * .5, 0, 7); ctx.fill(); }
+  ctx.fillStyle = '#b8b2a6'; ctx.beginPath(); ctx.arc(0, 0, r * .7, 0, 7); ctx.fill();
+  ctx.fillStyle = '#000'; ctx.beginPath(); ctx.arc(-r * .25, -r * .1, r * .12, 0, 7); ctx.arc(r * .25, -r * .1, r * .12, 0, 7); ctx.fill();
+  ctx.strokeStyle = '#000'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.arc(0, r * .12, r * .2, 0.2, Math.PI - .2); ctx.stroke();
+  ctx.restore();
+}
+
+/* ---------------- BACKGROUNDS ---------------- */
+const BG = {
+  library(t) {
+    ctx.fillStyle = '#5b3a29'; ctx.fillRect(0, 0, W, H);
+    const r = mulberry(7);
+    const cols = ['#8e2c2c', '#2c4f8e', '#2e7d4f', '#c9a227', '#6b3e8e', '#a0522d', '#3d3d3d'];
+    for (let row = 0; row < 5; row++) {
+      const y = 40 + row * 72;
+      ctx.fillStyle = '#3e2618'; ctx.fillRect(0, y + 58, W, 10);
+      let x = 0;
+      while (x < W) {
+        const w = 10 + r() * 18, h = 38 + r() * 20;
+        if (r() < .06) { x += 30; continue; }
+        ctx.fillStyle = cols[Math.floor(r() * cols.length)];
+        if (r() < .08) { ctx.save(); ctx.translate(x, y + 58); ctx.rotate(-.25); ctx.fillRect(0, -h, w, h); ctx.restore(); }
+        else ctx.fillRect(x, y + 58 - h, w, h);
+        ctx.fillStyle = '#0002'; ctx.fillRect(x + w - 2, y + 58 - h, 2, h);
+        x += w + 1;
+      }
+    }
+    ctx.fillStyle = '#2e1a10'; ctx.fillRect(0, 400, W, H - 400);
+    // SILENCE sign
+    ctx.fillStyle = '#f4ecd8'; rr(380, 8, 200, 40, 6); ctx.fill();
+    text('SILENCE.', 480, 29, 24, '#8e2c2c', 'center', null);
+  },
+  interview(t) {
+    ctx.fillStyle = '#cfd8dc'; ctx.fillRect(0, 0, W, H);
+    ctx.fillStyle = '#90caf9'; ctx.fillRect(560, 50, 340, 220);
+    const r = mulberry(3);
+    for (let i = 0; i < 9; i++) { const bh = 60 + r() * 150; ctx.fillStyle = i % 2 ? '#78909c' : '#607d8b'; ctx.fillRect(560 + i * 38, 270 - bh, 34, bh);
+      ctx.fillStyle = '#fff59d'; for (let j = 0; j < bh / 20 - 1; j++) if (r() < .5) ctx.fillRect(566 + i * 38, 280 - bh + j * 20, 8, 8); }
+    ctx.strokeStyle = '#fff'; ctx.lineWidth = 8; ctx.strokeRect(560, 50, 340, 220); ctx.beginPath(); ctx.moveTo(730, 50); ctx.lineTo(730, 270); ctx.stroke();
+    ctx.fillStyle = '#455a64'; rr(60, 60, 200, 120, 6); ctx.fill();
+    text('SYNERGY', 160, 100, 26, '#ffd23f', 'center', null); text('(mandatory)', 160, 140, 18, '#fff', 'center', null);
+    ctx.fillStyle = '#b0bec5'; ctx.fillRect(0, 420, W, H);
+    emoji('🪴', 70, 360, 90);
+    // desk
+    ctx.fillStyle = '#6d4c41'; ctx.fillRect(150, 340, 660, 30); ctx.fillStyle = '#5d4037'; ctx.fillRect(170, 370, 620, 80);
+    ctx.fillStyle = '#ffd54f'; rr(420, 318, 120, 24, 4); ctx.fill(); text('CEO (cool)', 480, 331, 14, '#000', 'center', null);
+    emoji('🍝', 690, 325, 40); text('extra pepper', 690, 300, 12, '#c0392b', 'center', '#fff');
+  },
+  wedding(t) {
+    ctx.fillStyle = '#fff1f4'; ctx.fillRect(0, 0, W, H);
+    for (let i = 0; i < 8; i++) { ctx.fillStyle = i % 2 ? '#ffe3ea' : '#fff1f4'; ctx.fillRect(i * 120, 0, 120, 400); }
+    // window
+    ctx.fillStyle = '#ffe082'; ctx.beginPath(); ctx.arc(480, 120, 70, Math.PI, 0); ctx.lineTo(550, 200); ctx.lineTo(410, 200); ctx.fill();
+    ctx.strokeStyle = '#d4a017'; ctx.lineWidth = 5; ctx.stroke();
+    // arch
+    ctx.strokeStyle = '#f48fb1'; ctx.lineWidth = 26; ctx.beginPath(); ctx.arc(480, 260, 210, Math.PI, 0); ctx.stroke();
+    for (let i = 0; i <= 14; i++) { const a = Math.PI + i / 14 * Math.PI; emoji(i % 2 ? '🌸' : '🌹', 480 + Math.cos(a) * 210, 260 + Math.sin(a) * 210, 30); }
+    ctx.fillStyle = '#c2185b'; ctx.beginPath(); ctx.moveTo(420, 400); ctx.lineTo(540, 400); ctx.lineTo(640, H); ctx.lineTo(320, H); ctx.fill();
+    ctx.fillStyle = '#efe0d0'; ctx.fillRect(0, 400, 320, H); ctx.fillRect(640, 400, W, H);
+    ctx.fillStyle = '#8d6e63'; for (let i = 0; i < 3; i++) { ctx.fillRect(20, 410 + i * 40, 270, 18); ctx.fillRect(670, 410 + i * 40, 270, 18); }
+  },
+  bomb(t) {
+    ctx.fillStyle = '#141914'; ctx.fillRect(0, 0, W, H);
+    const g = ctx.createRadialGradient(480, 0, 10, 480, 200, 520); g.addColorStop(0, '#fffbe0aa'); g.addColorStop(1, '#0000');
+    ctx.fillStyle = g; ctx.beginPath(); ctx.moveTo(430, 0); ctx.lineTo(530, 0); ctx.lineTo(820, H); ctx.lineTo(140, H); ctx.fill();
+    ctx.fillStyle = '#3e3e3e'; ctx.fillRect(280, 330, 400, 22); ctx.fillStyle = '#2a2a2a'; ctx.fillRect(300, 352, 20, 200); ctx.fillRect(640, 352, 20, 200);
+    // bomb box
+    ctx.fillStyle = '#5d4037'; rr(380, 250, 200, 82, 8); ctx.fill();
+    ctx.fillStyle = '#000'; rr(420, 262, 120, 40, 6); ctx.fill();
+    const blink = Math.floor(t * 2) % 2;
+    text(blink ? '00:07' : '00:07', 480, 283, 30, blink ? '#ff1744' : '#a00', 'center', null);
+    ['#e53935', '#1e88e5', '#43a047', '#fdd835'].forEach((c, i) => { ctx.strokeStyle = c; ctx.lineWidth = 5; ctx.beginPath();
+      ctx.moveTo(400 + i * 50, 305); ctx.bezierCurveTo(400 + i * 50, 340, 430 + i * 30, 300, 420 + i * 40, 330); ctx.stroke(); });
+    text('(it might be a toaster)', 480, 238, 13, '#aaa', 'center', null);
+  },
+  rex(t) {
+    const g = ctx.createLinearGradient(0, 0, 0, H); g.addColorStop(0, '#7ec850'); g.addColorStop(1, '#2e5d1a');
+    ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+    const r = mulberry(11);
+    for (let i = 0; i < 16; i++) { ctx.fillStyle = r() < .5 ? '#1f5f22' : '#2f7d32';
+      ctx.beginPath(); ctx.ellipse(r() * W, r() * 260, 60 + r() * 60, 25 + r() * 25, r() * 3, 0, 7); ctx.fill(); }
+    ctx.fillStyle = '#5d4a2a'; ctx.fillRect(0, 410, W, H);
+    // big bush you're hiding in
+    ctx.fillStyle = '#2e7d32'; for (let i = 0; i < 9; i++) { ctx.beginPath(); ctx.arc(100 + i * 95, 470 + Math.sin(i * 2) * 15, 70, 0, 7); ctx.fill(); }
+  },
+  tv(t) {
+    const g = ctx.createLinearGradient(0, 0, 0, H); g.addColorStop(0, '#0d1b4c'); g.addColorStop(1, '#1a0f2e');
+    ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+    ctx.fillStyle = '#ffffff10';
+    ctx.beginPath(); ctx.moveTo(150, 0); ctx.lineTo(220, 0); ctx.lineTo(400, H); ctx.lineTo(80, H); ctx.fill();
+    ctx.beginPath(); ctx.moveTo(740, 0); ctx.lineTo(810, 0); ctx.lineTo(880, H); ctx.lineTo(560, H); ctx.fill();
+    ctx.fillStyle = Math.floor(t * 1.5) % 2 ? '#ff1744' : '#7a0b20'; rr(30, 70, 110, 40, 8); ctx.fill();
+    text('ON AIR', 85, 91, 20, '#fff', 'center', null);
+    ctx.fillStyle = '#222'; rr(330, 18, 300, 46, 8); ctx.fill(); ctx.strokeStyle = '#ff1744'; ctx.lineWidth = 3; ctx.stroke();
+    text('🤫 QUIET PLEASE 🤫', 480, 42, 22, '#ff5252', 'center', null);
+    text('VIEWERS: 300,000,004', 830, 91, 14, '#9fa8da', 'center', null);
+    const r = mulberry(5);
+    for (let i = 0; i < 60; i++) { const x = (i % 20) * 50 + 10 + (Math.floor(i / 20) % 2) * 25, y = 360 + Math.floor(i / 20) * 34;
+      ctx.fillStyle = ['#ffcc80', '#8d5524', '#e0ac69', '#c68642'][Math.floor(r() * 4)]; ctx.beginPath(); ctx.arc(x, y, 14, 0, 7); ctx.fill();
+      ctx.fillStyle = '#000'; ctx.fillRect(x - 5, y - 3, 3, 3); ctx.fillRect(x + 2, y - 3, 3, 3); }
+    ctx.fillStyle = '#111'; ctx.fillRect(0, 440, W, H);
+  },
+};
+
+/* ---------------- LEVELS ---------------- */
+const DUST = { kind: 'dust', t: 12, s: 22 };
+const LEVELS = [
+  {
+    name: 'The Library of Extremely Old Books', bg: 'library', dur: 16, spawn: [1.25, .8], speed: 95, creep: 2,
+    intro: 'The librarian has waited 40 years for someone to break the silence. Do not give her the satisfaction. Also: the books are made of dust.',
+    npcs: [{ x: 190, y: 290, s: 1.15, body: '#6d4c7d', skin: '#e0b48a', glasses: true, hat: '' },
+           { x: 790, y: 300, s: .9, body: '#2e7d32', skin: '#c68642', hold: '📖' }],
+    parts: [DUST, DUST, { e: '🕸️', t: 18, s: 30 }],
+    lines: [[0, 'Shhhhh.'], [0, 'I heard that.'], [0, "That 'shh' was for your thoughts, too."], [1, '(whispering) dude your nose is huge'], [0, 'Breathing is a privilege, not a right.'], [0, 'Shhhhhhhhhhhhh.']],
+    debris: ['📚', '📖', '📕', '📗', '👓', '📜'],
+    held: ['Man sits quietly in library', 'Story continues on page 47, which nobody will read.'],
+    nose: ['Sneeze redistributes Dewey Decimal System', "Librarian finally at peace: 'I knew it. I KNEW it.'"],
+    ear: ['Local reader sneezes through ears', "Doctors 'not angry, just confused.' Library installs ear-guards."],
+  },
+  {
+    name: 'Final Interview at Serious Corp', bg: 'interview', dur: 18, spawn: [1.1, .65], speed: 110, creep: 2.5,
+    intro: 'Final round. The CEO is wearing a feather boa for reasons HR will not discuss. He is also eating spaghetti with extra pepper. At you.',
+    npcs: [{ x: 480, y: 220, s: 1.2, body: '#263238', skin: '#f1c27d', hat: '🎩', boa: true },
+           { x: 790, y: 250, s: .9, body: '#8e24aa', skin: '#8d5524', hold: '📋' }],
+    parts: [{ e: '🪶', t: 14, s: 30 }, { e: '🪶', t: 14, s: 30 }, { e: '🌶️', t: 22, s: 28 }],
+    lines: [[0, 'So. Where do you see yourself in five years?'], [0, "We're like a family here. A family that does not sneeze."], [1, "Your CV says 'expert at holding things in.' Prove it."],
+            [0, 'Is your nose... getting bigger?'], [1, '(writes something down. underlines it twice.)'], [0, 'Tell me about a time you failed. Take your time. No rush.']],
+    debris: ['💼', '📎', '☕', '📋', '🪴', '🍝', '🎩'],
+    held: ['Applicant gets the job', 'Must now hold in sneezes every weekday for the next 40 years.'],
+    nose: ['Candidate sneezes CEO through window', "Hired immediately as 'Head of Disruption.' Window not replaced."],
+    ear: ["Interviewee's ears whistle national anthem", 'Board stands, salutes. Stock price up 12%.'],
+  },
+  {
+    name: 'The Wedding', bg: 'wedding', dur: 20, spawn: [1.0, .55], speed: 120, creep: 3,
+    intro: "The priest has just asked if anyone objects. The church is perfectly silent. Your nose has opinions. The flower girl is armed.",
+    npcs: [{ x: 360, y: 280, s: 1, body: '#fafafa', skin: '#f1c27d', veil: true },
+           { x: 600, y: 280, s: 1.05, body: '#212121', skin: '#c68642', hat: '🎩' },
+           { x: 480, y: 220, s: .85, body: '#4a148c', skin: '#e0ac69', collar: true, hold: '📖' }],
+    parts: [{ e: '🌸', t: 12, s: 28 }, { e: '🌼', t: 14, s: 28 }, { e: '💐', t: 25, s: 34 }],
+    lines: [[2, 'If anyone objects to this union, speak now...'], [2, '...or forever hold your peace.'], [0, '(the bride is staring at your nose)'],
+            [2, '...anyone? ...no one? ...why is that man vibrating?'], [1, "Babe, why is your cousin's face purple?"], [2, 'Truly. Forever. Hold. It.']],
+    debris: ['🎂', '💍', '🥂', '💐', '🕊️', '🎩'],
+    held: ['Couple wed without incident', "Guests describe the wedding as 'nice.' Nothing else. Just nice."],
+    nose: ['Sneeze legally counts as objection', 'Bride now married to you instead. Honeymoon described as "damp."'],
+    ear: ["Wedding guest's ears release doves", 'Couple assumes it was planned. Tips extra.'],
+  },
+  {
+    name: 'Bomb Disposal Unit', bg: 'bomb', dur: 20, spawn: [.95, .5], speed: 125, creep: 3,
+    intro: 'You are holding the wire cutters. Your partner is holding their breath. Somebody brought a cat. The cat is airborne. Nobody knows why.',
+    npcs: [{ x: 790, y: 260, s: 1, body: '#37474f', skin: '#e0ac69', hat: '⛑️', sweat: true },
+           { x: 170, y: 330, s: 1, emoji: '🐈', size: 90 }],
+    parts: [{ e: '🐈', t: 32, s: 42, slow: .7 }, DUST, { e: '🪶', t: 14, s: 30 }],
+    lines: [[0, 'Red wire... no... blue wire...'], [0, 'Steady... steeeeeady...'], [0, "Whatever you do, don't sneeze."], [0, 'Why did I say that. Why would I say that.'],
+            [1, 'mrrrp. (sheds aggressively)'], [0, 'Is that cat... flying at your face?']],
+    debris: ['🔧', '✂️', '🧨', '🍞', '🐈', '⛑️'],
+    held: ['Bomb safely defused', 'It was a toaster. Everyone very embarrassed. Toast was good though.'],
+    nose: ['Sneeze cuts all wires at once', "Bomb, confused, plays 'Macarena' and surrenders."],
+    ear: ["Agent's ear-sneeze defuses bomb", "Bomb squad 'genuinely does not know how to write this up.'"],
+  },
+  {
+    name: 'Hiding From a T-Rex', bg: 'rex', dur: 22, spawn: [.85, .45], speed: 135, creep: 3.5,
+    intro: 'Its vision is based on movement. Its hearing is based on sneezes. Its favourite food is people who sneeze. You are in a bush. The bush is pollinating.',
+    npcs: [{ x: 700, y: 200, s: 1, rex: true }],
+    parts: [{ e: '🍃', t: 12, s: 28 }, { e: '🌼', t: 14, s: 28 }, { e: '🦟', t: 16, s: 24 }],
+    lines: [[0, '*sniff sniff*'], [0, "RAWR? (translation: 'did someone almost sneeze?')"], [0, '(the T-Rex is checking its tiny watch)'],
+            [0, '(it is trying to do a push-up. it cannot.)'], [0, "RAWR. (translation: 'I can smell your nose thinking.')"], [0, '(tiny arms. big ears.)']],
+    debris: ['🦴', '🥚', '🍖', '🌴', '🍃', '🦖'],
+    held: ['Man survives T-Rex encounter', 'T-Rex leaves two-star review of jungle: "Not enough sneezers."'],
+    nose: ["T-Rex says 'bless you', eats man anyway", 'Lovely manners, but at what cost.'],
+    ear: ['Ear-sneeze startles T-Rex into extinction', 'Again. Scientists: "We really thought it was the asteroid."'],
+  },
+  {
+    name: 'National Moment of Silence (LIVE)', bg: 'tv', dur: 25, spawn: [.75, .35], speed: 145, creep: 4,
+    intro: "Live broadcast. 300 million viewers. The world's quietest minute. You are standing next to the microphone. Of course you are. Someone released pepper, feathers AND the cat.",
+    npcs: [{ x: 250, y: 250, s: 1.05, body: '#1a237e', skin: '#f1c27d', tie: true },
+           { x: 720, y: 255, s: 1, body: '#fff', skin: '#ffffff', stripes: true, hat: '🎨', mime: true }],
+    parts: [{ e: '🌶️', t: 22, s: 28 }, { e: '🪶', t: 14, s: 30 }, { e: '🌸', t: 12, s: 28 }, DUST, { e: '🐈', t: 32, s: 42, slow: .7 }],
+    lines: [[0, "(mouths: 'don't.')"], [1, '(a mime is crying. silently. professionally.)'], [0, '(a pin drops. everyone glares at the pin.)'],
+            [1, '(the mime pretends to be trapped in a box of silence)'], [0, '(the microphone is listening.)'], [0, '(mouths: "I will end you.")']],
+    debris: ['🎤', '📺', '🎥', '🪧', '🏆', '🎨'],
+    held: ['World enjoys one full minute of silence', 'Economists report productivity at all-time high. Your face is now 40% pressure.'],
+    nose: ['Sneeze heard from space', "Aliens reply: 'Gesundheit.' First contact achieved. Thanks, nose."],
+    ear: ["Man's ears honk on live TV", 'Declared new national instrument. Orchestra auditions begin Monday.'],
+  },
+];
+
+const THOUGHTS = ['taxes', 'your houseplant giving up on you', 'socks with sandals', 'your phone at 1%', 'who ate the last cookie',
+  'waving back at someone who wasn’t waving at you', 'Mondays', 'ice cream, face down, on gravel', 'the sound of dial-up internet',
+  'your search history, read aloud', 'a wet sock', 'stepping on a LEGO', 'grandma’s cheek pinches', 'the word "moist"',
+  'that thing you said in 2014', 'a printer that is "almost" working', 'pigeons. just pigeons.'];
+const RATINGS = [
+  ['Human Leaf Blower', 'You have not held a single sneeze. Meteorologists now track you by name.'],
+  ['Certified Nose Hazard', 'Airlines have added you to a list. It is not the frequent flyer list.'],
+  ['Moderately Damp Citizen', 'People say "bless you" pre-emptively when you enter a room.'],
+  ['Half-Dignified', 'Exactly as dignified as you are damp. Perfect balance.'],
+  ['Nasal Ninja', 'Your nose is respected and feared in equal measure.'],
+  ['Sinus Samurai', 'Monks travel from distant mountains to watch you not sneeze.'],
+  ['THE UNSNEEZABLE', 'You held it all in. ALL of it. Please see a doctor. Possibly a plumber.'],
+];
+const TICKLE_WORDS = ['*tickle*', '*tickle tickle*', 'oh no', '*sniff*', 'nnngh', 'nope nope', '*twitch*', 'not now'];
+
+/* ---------------- STATE ---------------- */
+const keys = {};
+const touch = { left: false, right: false, pinch: false };
+let mode = 'title', lvl = 0, results = [], S = null, clock = 0;
+
+function startLevel(i) {
+  const L = LEVELS[i];
+  S = { L, t: 0, left: L.dur, T: 8, P: 0, lean: 0, pinch: false, parts: [], spawnT: 1.2, qte: null, qteT: 3 + rand(0, 2),
+    msg: '', msgT: 0, line: null, lineT: 1.5, lineIdx: 0, ahT: 0, ahN: 0, fakeCd: 0, fx: [], floaters: [], debris: [],
+    npcs: L.npcs.map(n => ({ ...n, ox: n.x, oy: n.y, vx: 0, vy: 0, rot: 0, vr: 0, fly: false })),
+    shake: 0, flash: 0, sneeze: null, wonT: 0, px: W / 2, py: 440, prot: 0, pvy: 0, pvx: 0, steamT: 0, tearT: 0 };
+  mode = 'play';
+}
+function noseXY() { return { x: S.px + S.lean * 0, y: S.py + 8 }; }
+function note(m, t = 2.2) { S.msg = m; S.msgT = t; }
+function floater(t, x, y, col = '#fff', size = 22) { S.floaters.push({ t, x, y, col, size, life: 1.3, max: 1.3 }); }
+
+/* ---------------- INPUT ---------------- */
+window.addEventListener('keydown', e => {
+  const k = e.key.length === 1 ? e.key.toUpperCase() : e.key;
+  if ([' ', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(e.key)) e.preventDefault();
+  if (k === 'M') { toggleMute(); return; }
+  if (e.repeat) { keys[k] = true; return; }
+  keys[k] = true;
+  ac();
+  if (mode === 'play' && S && S.qte && k.length === 1 && k !== ' ') {
+    if (k === S.qte.key) qteSuccess();
+    else if (!['A', 'D'].includes(k)) { S.T += 4; floater('wrong thought: feathers', S.px, S.py - 110, '#ff8a80', 18); sfx.bad(); }
+  }
+  if ((e.key === 'Enter' || e.key === ' ') && mode !== 'play' && mode !== 'sneeze' && mode !== 'won') {
+    const btn = document.querySelector('.overlay.show button.big'); if (btn) { e.preventDefault(); btn.click(); }
+  }
+});
+window.addEventListener('keyup', e => { const k = e.key.length === 1 ? e.key.toUpperCase() : e.key; keys[k] = false; });
+window.addEventListener('blur', () => { for (const k in keys) keys[k] = false; touch.left = touch.right = touch.pinch = false; });
+document.querySelectorAll('#touch button').forEach(b => {
+  const k = b.dataset.k;
+  const on = e => { e.preventDefault(); ac(); touch[k] = true; b.classList.add('on'); try { b.setPointerCapture(e.pointerId); } catch (_) {} };
+  const off = e => { e.preventDefault(); touch[k] = false; b.classList.remove('on'); };
+  b.addEventListener('pointerdown', on); b.addEventListener('pointerup', off); b.addEventListener('pointercancel', off); b.addEventListener('lostpointercapture', off);
+});
+$('qte').addEventListener('pointerdown', e => { e.preventDefault(); if (mode === 'play' && S && S.qte) qteSuccess(); });
+const isTouch = matchMedia('(pointer: coarse)').matches || 'ontouchstart' in window;
+function toggleMute() { muted = !muted; $('mute').textContent = muted ? '🔇' : '🔊'; if (muted && 'speechSynthesis' in window) speechSynthesis.cancel(); }
+$('mute').addEventListener('click', e => { e.stopPropagation(); toggleMute(); });
+
+/* ---------------- QTE ---------------- */
+const QKEYS = 'FGHJKLRTYUIOPZXCVBN';
+function qteStart() {
+  const key = QKEYS[Math.floor(Math.random() * QKEYS.length)], thought = pick(THOUGHTS);
+  S.qte = { key, thought, t: 1.9, max: 1.9 };
+  $('qteKey').textContent = isTouch ? 'TAP HERE' : key;
+  $('qteText').textContent = 'think about ' + thought;
+  $('qte').classList.add('show');
+}
+function qteEnd() { S.qte = null; S.qteT = 3.5 + rand(0, 3); $('qte').classList.remove('show'); }
+function qteSuccess() {
+  S.T = Math.max(0, S.T - 30); sfx.good();
+  floater('…' + S.qte.thought + '…', S.px, S.py - 120, '#b9f6ca', 20);
+  note(pick(['Distraction successful. You feel worse, but less sneezy.', 'Sadness: the natural antihistamine.', 'Nose temporarily confused.']));
+  qteEnd();
+}
+
+/* ---------------- UPDATE ---------------- */
+function update(dt) {
+  clock += dt;
+  if (!S) return;
+  S.t += dt;
+  const L = S.L;
+  // physics of flying stuff always
+  for (const f of S.fx) { f.x += f.vx * dt; f.y += f.vy * dt; f.vy += (f.g || 0) * dt; f.life -= dt; }
+  S.fx = S.fx.filter(f => f.life > 0);
+  for (const f of S.floaters) { f.y -= 40 * dt; f.life -= dt; }
+  S.floaters = S.floaters.filter(f => f.life > 0);
+  for (const d of S.debris) { d.x += d.vx * dt; d.y += d.vy * dt; d.vy += 700 * dt; d.rot += d.vr * dt; }
+  for (const n of S.npcs) if (n.fly) { n.x += n.vx * dt; n.y += n.vy * dt; n.vy += 600 * dt; n.rot += n.vr * dt; }
+  S.shake = Math.max(0, S.shake - dt * 30); S.flash = Math.max(0, S.flash - dt * 2);
+  if (S.msgT > 0) S.msgT -= dt;
+
+  if (mode === 'play') updatePlay(dt);
+  else if (mode === 'sneeze') updateSneeze(dt);
+  else if (mode === 'won') { S.wonT += dt; if (S.wonT > 1.6) finishLevel('held'); }
+}
+
+function updatePlay(dt) {
+  const L = S.L;
+  const dir = ((keys.ArrowRight || keys.D || touch.right) ? 1 : 0) - ((keys.ArrowLeft || keys.A || touch.left) ? 1 : 0);
+  S.lean = clamp(S.lean + dir * 2.8 * dt, -1, 1);
+  S.px = W / 2 + S.lean * 230;
+  S.prot = S.lean * 0.12;
+  const wasPinch = S.pinch;
+  S.pinch = !!(keys[' '] || touch.pinch);
+  if (S.pinch && !wasPinch) sfx.squeak();
+
+  S.T += L.creep * dt;
+  if (S.pinch) { S.T -= 15 * dt; S.P += 23 * dt; } else S.P -= 12 * dt;
+  S.T = Math.max(0, S.T); S.P = Math.max(0, S.P);
+
+  // spawn tickly stuff
+  const prog = 1 - S.left / L.dur;
+  S.spawnT -= dt;
+  if (S.spawnT <= 0) {
+    S.spawnT = L.spawn[0] + (L.spawn[1] - L.spawn[0]) * prog;
+    const type = pick(L.parts), n = noseXY();
+    let x, y;
+    const side = Math.random();
+    if (side < .5) { x = rand(40, W - 40); y = -30; } else if (side < .75) { x = -30; y = rand(80, 330); } else { x = W + 30; y = rand(80, 330); }
+    const tx = n.x + rand(-50, 50), ty = n.y + rand(-20, 20);
+    const sp = L.speed * rand(.8, 1.2) * (type.slow || 1);
+    const d = Math.hypot(tx - x, ty - y);
+    S.parts.push({ ...type, x, y, vx: (tx - x) / d * sp, vy: (ty - y) / d * sp, w: rand(0, 6), wa: rand(10, 30), rot: rand(-1, 1), age: 0 });
+  }
+  const n = noseXY(), nr = 16 + S.T / 100 * 18;
+  for (const p of S.parts) {
+    p.age += dt; p.x += p.vx * dt; p.y += p.vy * dt;
+    const wob = Math.sin(p.age * 4 + p.w) * p.wa;
+    p.dx = wob * (p.vy > Math.abs(p.vx) ? 1 : 0); p.dy = wob * (p.vy > Math.abs(p.vx) ? 0 : 1) * .5;
+    const px = p.x + p.dx, py = p.y + p.dy;
+    if (!p.hit && Math.hypot(px - n.x, py - n.y) < nr + p.s * .45) {
+      p.hit = true;
+      if (S.pinch) { S.T += p.t * .35; S.P += p.t * .5; floater('*muffled tickle*', n.x + rand(-40, 40), n.y - 70, '#ffe082', 17); }
+      else { S.T += p.t; floater(pick(TICKLE_WORDS), n.x + rand(-50, 50), n.y - 70, '#ffccbc', 20); }
+      sfx.tickle();
+      for (let i = 0; i < 6; i++) S.fx.push({ x: px, y: py, vx: rand(-80, 80), vy: rand(-120, 0), g: 300, life: .5, max: .5, kind: 'spark', r: 3 });
+    }
+  }
+  S.parts = S.parts.filter(p => !p.hit && p.x > -80 && p.x < W + 80 && p.y < H + 60 && p.age < 15);
+
+  // fake-out: the sneeze retreats
+  S.fakeCd -= dt;
+  if (S.T > 88 && S.fakeCd <= 0 && Math.random() < dt * .35) {
+    S.T = 45; S.fakeCd = 8; note('…the sneeze retreats. It is regrouping. It will be back.', 2.8); sfx.boing();
+  }
+
+  // QTE
+  if (S.qte) { S.qte.t -= dt; $('qteBar').style.transform = `scaleX(${clamp(S.qte.t / S.qte.max, 0, 1)})`;
+    if (S.qte.t <= 0) { S.T += 12; sfx.bad(); note(pick(['Too slow. You thought about pepper instead.', 'You thought about feathers. Why would you do that.', 'Your brain offered: "a big fluffy cat". Thanks, brain.'])); qteEnd(); } }
+  else { S.qteT -= dt; if (S.qteT <= 0) qteStart(); }
+
+  // NPC lines
+  S.lineT -= dt;
+  if (S.lineT <= 0) { S.line = L.lines[S.lineIdx % L.lines.length]; S.lineIdx++; S.lineT = 3.6; S.lineShow = 2.8; }
+  if (S.lineShow > 0) S.lineShow -= dt;
+
+  // ah... ah...
+  if (S.T > 70) { S.ahT -= dt; if (S.ahT <= 0) { S.ahN = (S.ahN + 1) % 4; const lvl = Math.floor((S.T - 70) / 10);
+      floater(['ah…', 'ahh…', 'AHH…', 'ah—'][Math.min(3, lvl)], S.px + 60, S.py - 80, '#fff', 22 + lvl * 4); sfx.ah(lvl); S.ahT = 1.3 - (S.T - 70) / 30 * .7; } }
+  else S.ahT = 0;
+
+  // steam / tears
+  if (S.P > 60) { S.steamT -= dt; if (S.steamT <= 0) { S.steamT = .25 - (S.P - 60) / 40 * .18;
+      for (const s of [-1, 1]) S.fx.push({ x: S.px + s * 62, y: S.py - 5, vx: s * rand(20, 60), vy: rand(-90, -50), life: 1, max: 1, kind: 'steam', r: rand(8, 14) }); } }
+  if (S.T > 72) { S.tearT -= dt; if (S.tearT <= 0) { S.tearT = .3;
+      for (const s of [-1, 1]) S.fx.push({ x: S.px + s * 22, y: S.py - 8, vx: s * rand(20, 60), vy: rand(-60, -20), g: 500, life: 1, max: 1, kind: 'tear', r: 4 }); } }
+
+  // timer
+  S.left -= dt;
+  if (S.T >= 100) return startSneeze('nose');
+  if (S.P >= 100) return startSneeze('ear');
+  if (S.left <= 0) { S.left = 0; mode = 'won'; S.wonT = 0; qteEnd(); sfx.win(); note('…you held it.', 3);
+    S.parts = []; S.T = Math.min(S.T, 40); S.P = Math.min(S.P, 30); }
+}
+
+function startSneeze(kind) {
+  mode = 'sneeze'; qteEnd();
+  S.sneeze = { kind, t: 0, stage: 0 };
+  S.T = 100;
+  if (kind === 'ear') note('PRESSURE CRITICAL. The sneeze is looking for another exit.', 3);
+}
+function explode() {
+  const n = noseXY(), sn = S.sneeze;
+  S.shake = 28; S.flash = 1;
+  for (const npc of S.npcs) {
+    npc.fly = true; const s = Math.sign(npc.x - n.x) || pick([-1, 1]);
+    npc.vx = s * rand(500, 900) * (sn.kind === 'ear' ? .6 : 1); npc.vy = -rand(500, 800); npc.vr = rand(-8, 8);
+  }
+  for (let i = 0; i < 26; i++) S.debris.push({ e: pick(S.L.debris), x: rand(100, W - 100), y: rand(150, 380), vx: rand(-700, 700), vy: -rand(300, 900), rot: 0, vr: rand(-12, 12), s: rand(26, 50) });
+  if (sn.kind === 'nose') {
+    for (let i = 0; i < 70; i++) { const a = rand(-Math.PI * .95, -Math.PI * .05), sp = rand(300, 1100);
+      S.fx.push({ x: n.x, y: n.y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, g: 600, life: 1.8, max: 1.8, kind: pick(['snot', 'spark', 'spark']), r: rand(3, 9) }); }
+    S.pvy = 400; sfx.choo();
+  } else {
+    for (let i = 0; i < 60; i++) for (const s of [-1, 1])
+      S.fx.push({ x: S.px + s * 62, y: S.py - 5, vx: s * rand(200, 900), vy: rand(-300, 100), life: 1.6, max: 1.6, kind: 'steam', r: rand(8, 20) });
+    S.pvy = -900; S.pvr = 14; sfx.ear();
+  }
+}
+function updateSneeze(dt) {
+  const sn = S.sneeze; sn.t += dt;
+  if (sn.kind === 'nose') {
+    const ahs = [0, .5, 1.0];
+    while (sn.stage < 3 && sn.t >= ahs[sn.stage]) { sfx.ah(sn.stage + 1); floater(['ah…', 'AHH…', 'AAAHHH—'][sn.stage], S.px + 70, S.py - 90, '#fff', 26 + sn.stage * 8); sn.stage++; }
+    if (sn.stage === 3 && sn.t >= 1.5) { sn.stage = 4; explode(); }
+  } else {
+    if (sn.stage === 0 && sn.t > .2) { sn.stage = 1; sfx.ah(0); floater('nnnnNNNNGGG—', S.px, S.py - 110, '#ffd23f', 28); }
+    if (sn.stage === 1 && sn.t >= 1.3) { sn.stage = 4; explode(); }
+  }
+  if (sn.stage === 4) {
+    S.py += S.pvy * dt; S.pvy += (sn.kind === 'ear' ? 500 : -900) * dt;
+    if (sn.kind === 'nose' && S.py < 440) { S.py = 440; S.pvy = 0; }
+    if (sn.kind === 'ear') S.prot += (S.pvr || 0) * dt;
+  }
+  if (sn.t > 4.6) finishLevel(sn.kind);
+}
+
+/* ---------------- DRAW ---------------- */
+function drawNPC(n) {
+  const nn = noseXY();
+  ctx.save(); ctx.translate(n.x, n.y); ctx.rotate(n.rot); ctx.scale(n.s || 1, n.s || 1);
+  if (n.emoji) { emoji(n.emoji, 0, 0, n.size, Math.sin(clock * 2) * .1); ctx.restore(); return; }
+  if (n.rex) { drawRex(n); ctx.restore(); return; }
+  const stare = S.T > 55 || mode === 'sneeze';
+  // body
+  ctx.fillStyle = n.body; rr(-48, 30, 96, 140, 30); ctx.fill(); ctx.strokeStyle = '#0006'; ctx.lineWidth = 3; ctx.stroke();
+  if (n.stripes) { ctx.fillStyle = '#111'; for (let i = 0; i < 5; i++) ctx.fillRect(-48, 40 + i * 24, 96, 10); }
+  if (n.tie) { ctx.fillStyle = '#c62828'; ctx.beginPath(); ctx.moveTo(0, 34); ctx.lineTo(-10, 50); ctx.lineTo(0, 110); ctx.lineTo(10, 50); ctx.fill(); }
+  if (n.collar) { ctx.fillStyle = '#fff'; ctx.fillRect(-10, 30, 20, 10); }
+  if (n.boa) { ctx.fillStyle = '#f06292'; for (let i = 0; i < 12; i++) { ctx.beginPath(); ctx.arc(-50 + i * 9, 34 + Math.sin(i) * 5, 12, 0, 7); ctx.fill(); } }
+  // head
+  ctx.fillStyle = n.skin; ctx.beginPath(); ctx.arc(0, 0, 36, 0, 7); ctx.fill(); ctx.strokeStyle = '#0005'; ctx.stroke();
+  if (n.mime) { ctx.fillStyle = '#000'; ctx.fillRect(-14, -18, 6, 14); ctx.fillRect(8, -18, 6, 14); }
+  // eyes look at nose
+  const ang = Math.atan2(nn.y - (n.y), nn.x - n.x);
+  const big = stare ? 1.4 : 1;
+  for (const s of [-1, 1]) {
+    ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(s * 13, -6, 8 * big, 0, 7); ctx.fill();
+    ctx.fillStyle = '#000'; ctx.beginPath(); ctx.arc(s * 13 + Math.cos(ang) * 3 * big, -6 + Math.sin(ang) * 3 * big, 3.5, 0, 7); ctx.fill();
+    // brows
+    ctx.strokeStyle = '#000'; ctx.lineWidth = 3; ctx.beginPath();
+    if (stare) { ctx.moveTo(s * 5, -18); ctx.lineTo(s * 22, -24); } else { ctx.moveTo(s * 6, -20); ctx.lineTo(s * 20, -20); }
+    ctx.stroke();
+  }
+  if (n.glasses) { ctx.strokeStyle = '#000'; ctx.lineWidth = 2.5; ctx.beginPath(); ctx.arc(-13, -6, 11, 0, 7); ctx.moveTo(24, -6); ctx.arc(13, -6, 11, 0, 7); ctx.moveTo(-2, -6); ctx.lineTo(2, -6); ctx.stroke(); }
+  // mouth
+  ctx.strokeStyle = '#000'; ctx.lineWidth = 3; ctx.beginPath();
+  if (mode === 'sneeze' && S.sneeze.stage === 4) { ctx.fillStyle = '#300'; ctx.arc(0, 16, 9, 0, 7); ctx.fill(); }
+  else if (stare) { ctx.moveTo(-10, 18); ctx.lineTo(10, 18); }
+  else { ctx.arc(0, 10, 10, .3, Math.PI - .3); }
+  ctx.stroke();
+  if (n.sweat && (S.T > 50 || mode === 'sneeze')) { ctx.fillStyle = '#4fc3f7'; ctx.beginPath(); ctx.arc(30, -18 + (clock * 40) % 30, 5, 0, 7); ctx.fill(); }
+  if (n.veil) { ctx.fillStyle = '#ffffffaa'; ctx.beginPath(); ctx.moveTo(-30, -30); ctx.quadraticCurveTo(0, -55, 30, -30); ctx.lineTo(55, 90); ctx.lineTo(-55, 90); ctx.closePath(); ctx.fill(); }
+  if (n.hat) emoji(n.hat, 0, -48, 46);
+  if (n.hold) emoji(n.hold, 50, 80, 38);
+  ctx.restore();
+}
+function drawRex(n) {
+  const nn = noseXY(), breathe = Math.sin(clock * 2) * 4, sniff = S.T > 55 || mode === 'sneeze';
+  ctx.fillStyle = '#4e7d3a'; ctx.strokeStyle = '#1f3a14'; ctx.lineWidth = 4;
+  // tail + body
+  ctx.beginPath(); ctx.moveTo(200, 120); ctx.quadraticCurveTo(120, 40, 40, 60); ctx.lineTo(-60, 40); ctx.quadraticCurveTo(-120, 80, -80, 200);
+  ctx.lineTo(60, 220); ctx.quadraticCurveTo(140, 170, 200, 120); ctx.fill(); ctx.stroke();
+  // legs
+  ctx.fillRect(-50, 180, 40, 90); ctx.fillRect(30, 180, 40, 90);
+  // head
+  ctx.save(); ctx.translate(-100, -20 + breathe); ctx.rotate(sniff ? Math.sin(clock * 9) * .08 : 0);
+  ctx.beginPath(); rr(-120, -50, 170, 100, 30); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = '#fff'; for (let i = 0; i < 7; i++) { ctx.beginPath(); ctx.moveTo(-110 + i * 20, 30); ctx.lineTo(-100 + i * 20, 48); ctx.lineTo(-90 + i * 20, 30); ctx.fill(); }
+  ctx.fillStyle = '#ffeb3b'; ctx.beginPath(); ctx.arc(10, -20, 14, 0, 7); ctx.fill();
+  const ang = Math.atan2(nn.y - n.y, nn.x - n.x);
+  ctx.fillStyle = '#000'; ctx.beginPath(); ctx.ellipse(10 + Math.cos(ang) * 5, -20 + Math.sin(ang) * 5, 3, 10, 0, 0, 7); ctx.fill();
+  ctx.fillStyle = '#1f3a14'; ctx.beginPath(); ctx.arc(-108, -25, 5, 0, 7); ctx.fill();
+  ctx.restore();
+  // tiny arms
+  ctx.strokeStyle = '#4e7d3a'; ctx.lineWidth = 10; ctx.lineCap = 'round';
+  ctx.beginPath(); ctx.moveTo(-70, 90); ctx.lineTo(-95, 110 + Math.sin(clock * 6) * 6); ctx.stroke();
+  ctx.lineCap = 'butt';
+  emoji('⌚', -98, 112, 16);
+}
+
+function drawPlayer() {
+  const T = S.T, P = S.P, x = S.px, y = S.py;
+  ctx.save(); ctx.translate(x, y + 120); ctx.rotate(S.prot); ctx.translate(0, -120);
+  const jitter = (T > 80 || P > 80) ? rand(-2, 2) : 0;
+  ctx.translate(jitter, 0);
+  // body
+  ctx.fillStyle = '#3a7bd5'; rr(-80, 50, 160, 140, 40); ctx.fill(); ctx.strokeStyle = '#123'; ctx.lineWidth = 4; ctx.stroke();
+  // head (puffs with pressure)
+  const puff = 1 + P / 100 * .35;
+  ctx.save(); ctx.scale(puff, 1 + P / 100 * .08);
+  // ears
+  ctx.fillStyle = '#f1c27d'; ctx.strokeStyle = '#7a5230'; ctx.lineWidth = 3;
+  for (const s of [-1, 1]) { ctx.beginPath(); ctx.ellipse(s * 58, -5, 12, 18, 0, 0, 7); ctx.fill(); ctx.stroke(); }
+  ctx.beginPath(); ctx.arc(0, 0, 58, 0, 7); ctx.fill(); ctx.stroke();
+  const red = clamp(P / 100 * .55 + T / 100 * .15, 0, .7);
+  ctx.fillStyle = `rgba(220,30,40,${red})`; ctx.beginPath(); ctx.arc(0, 0, 58, 0, 7); ctx.fill();
+  ctx.restore();
+  // hair
+  ctx.fillStyle = '#4e342e'; ctx.beginPath(); ctx.arc(0, -28, 50, Math.PI * 1.05, Math.PI * 1.95); ctx.fill();
+  if (T > 60) { ctx.strokeStyle = '#4e342e'; ctx.lineWidth = 4; for (let i = -2; i <= 2; i++) { ctx.beginPath(); ctx.moveTo(i * 10, -72); ctx.lineTo(i * 14, -90 - (T - 60) / 3); ctx.stroke(); } }
+  // eyes
+  ctx.strokeStyle = '#000'; ctx.fillStyle = '#000'; ctx.lineWidth = 4;
+  for (const s of [-1, 1]) {
+    const ex = s * 22, ey = -14;
+    if (mode === 'won') { ctx.beginPath(); ctx.arc(ex, ey + 4, 9, Math.PI + .3, -.3); ctx.stroke(); }
+    else if (T < 50) { ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(ex, ey, 11, 0, 7); ctx.fill(); ctx.stroke(); ctx.fillStyle = '#000'; ctx.beginPath(); ctx.arc(ex + S.lean * -3, ey + 2, 5, 0, 7); ctx.fill(); }
+    else if (T < 80) { ctx.beginPath(); ctx.moveTo(ex - 11, ey); ctx.quadraticCurveTo(ex, ey - 7, ex + 11, ey); ctx.stroke(); }
+    else { ctx.beginPath(); ctx.moveTo(ex - 10 * s, ey - 8); ctx.lineTo(ex + 8 * s, ey); ctx.lineTo(ex - 10 * s, ey + 8); ctx.stroke(); }
+    // brows
+    ctx.beginPath(); ctx.moveTo(ex - 12, ey - 18 - T / 10); ctx.lineTo(ex + 12, ey - 18 - T / 10 + s * (T > 50 ? 6 : 0) * -1); ctx.stroke();
+  }
+  // nose
+  const ns = 1 + T / 100 * 1.5 + (T > 70 ? Math.sin(clock * 20) * .08 : 0);
+  ctx.save(); ctx.translate(0, 8); ctx.scale(ns, ns);
+  ctx.fillStyle = `rgb(${235 + T * .2}, ${170 - T * 1.2}, ${120 - T * .9})`; ctx.strokeStyle = '#7a3020'; ctx.lineWidth = 2.5 / ns;
+  ctx.beginPath(); ctx.ellipse(0, 0, 15, 13, 0, 0, 7); ctx.fill(); ctx.stroke();
+  const flare = 2.5 + T / 100 * 3 + (T > 70 ? Math.abs(Math.sin(clock * 12)) * 2 : 0);
+  ctx.fillStyle = '#3a1a10'; for (const s of [-1, 1]) { ctx.beginPath(); ctx.ellipse(s * 6, 5, flare * .7, flare * .5, 0, 0, 7); ctx.fill(); }
+  ctx.fillStyle = '#fff8'; ctx.beginPath(); ctx.arc(-5, -5, 3, 0, 7); ctx.fill();
+  ctx.restore();
+  // mouth
+  const my = 36 + T / 100 * 8;
+  ctx.strokeStyle = '#000'; ctx.lineWidth = 4;
+  if (mode === 'sneeze' && S.sneeze.kind === 'nose' && S.sneeze.stage < 4) { ctx.fillStyle = '#5a0f0f'; ctx.beginPath(); ctx.ellipse(0, my, 10 + S.sneeze.t * 8, 6 + S.sneeze.t * 10, 0, 0, 7); ctx.fill(); }
+  else if (mode === 'won') { ctx.beginPath(); ctx.arc(0, my - 6, 14, .2, Math.PI - .2); ctx.stroke(); }
+  else if (S.pinch || P > 40) { ctx.beginPath(); ctx.moveTo(-14, my); ctx.lineTo(14, my); ctx.stroke(); ctx.fillStyle = `rgba(200,40,40,${P / 200})`; for (const s of [-1, 1]) { ctx.beginPath(); ctx.arc(s * 34, 18, 12 + P / 10, 0, 7); ctx.fill(); } }
+  else if (T > 70) { ctx.fillStyle = '#5a0f0f'; ctx.beginPath(); ctx.ellipse(0, my, 8, 4 + (T - 70) / 4, 0, 0, 7); ctx.fill(); }
+  else { ctx.beginPath(); ctx.moveTo(-12, my); ctx.quadraticCurveTo(0, my + 4, 12, my - 2); ctx.stroke(); }
+  // pinching hand
+  if (S.pinch && mode === 'play') {
+    ctx.strokeStyle = '#e0ac69'; ctx.lineWidth = 22; ctx.lineCap = 'round';
+    ctx.beginPath(); ctx.moveTo(60, 120); ctx.quadraticCurveTo(70, 60, 22 * ns, 20); ctx.stroke(); ctx.lineCap = 'butt';
+    ctx.fillStyle = '#f1c27d'; ctx.strokeStyle = '#7a5230'; ctx.lineWidth = 3;
+    for (const s of [-1, 1]) { ctx.beginPath(); ctx.ellipse(s * 17 * ns, 8, 8, 12, 0, 0, 7); ctx.fill(); ctx.stroke(); }
+  }
+  ctx.restore();
+}
+
+function bar(x, y, w, h, v, col, label) {
+  ctx.fillStyle = '#0008'; rr(x - 3, y - 3, w + 6, h + 6, 10); ctx.fill();
+  ctx.fillStyle = '#333'; rr(x, y, w, h, 8); ctx.fill();
+  const vv = clamp(v / 100, 0, 1);
+  ctx.fillStyle = vv > .8 && Math.floor(clock * 8) % 2 ? '#fff' : col; rr(x, y, Math.max(8, w * vv), h, 8); ctx.fill();
+  text(label, x + 10, y + h / 2 + 1, 15, '#fff', 'left', '#000');
+}
+
+function draw() {
+  const dpr = cv.width / W;
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.clearRect(0, 0, W, H);
+  if (!S) { drawAttract(); return; }
+  ctx.save();
+  if (S.shake > 0) ctx.translate(rand(-S.shake, S.shake), rand(-S.shake, S.shake));
+  // slow zoom toward face as sneeze builds
+  let z = 0;
+  if (mode === 'play' && S.T > 70) z = (S.T - 70) / 30 * .12;
+  if (mode === 'sneeze' && S.sneeze.stage < 4) z = .12 + S.sneeze.t * .25;
+  if (z) { const n = noseXY(); ctx.translate(n.x, n.y); ctx.scale(1 + z, 1 + z); ctx.translate(-n.x, -n.y); }
+
+  BG[S.L.bg](S.t);
+  for (const n of S.npcs) drawNPC(n);
+  if (S.line && S.lineShow > 0 && mode === 'play') {
+    const n = S.npcs[S.line[0]]; const hy = n.rex ? n.y - 80 : n.y - 50 * (n.s || 1);
+    bubble(S.line[1], n.rex ? n.x - 150 : n.x, hy);
+  }
+  for (const p of S.parts) {
+    const x = p.x + (p.dx || 0), y = p.y + (p.dy || 0);
+    if (p.kind === 'dust') dustBunny(x, y, p.s * .55, p.age); else emoji(p.e, x, y, p.s, Math.sin(p.age * 3) * .4 + p.rot);
+  }
+  drawPlayer();
+  for (const d of S.debris) emoji(d.e, d.x, d.y, d.s, d.rot);
+  for (const f of S.fx) {
+    const a = clamp(f.life / f.max, 0, 1);
+    if (f.kind === 'steam') { ctx.fillStyle = `rgba(240,240,240,${a * .7})`; ctx.beginPath(); ctx.arc(f.x, f.y, f.r * (2 - a), 0, 7); ctx.fill(); }
+    else if (f.kind === 'tear') { ctx.fillStyle = `rgba(79,195,247,${a})`; ctx.beginPath(); ctx.arc(f.x, f.y, f.r, 0, 7); ctx.fill(); }
+    else if (f.kind === 'snot') { ctx.fillStyle = `rgba(160,220,80,${a})`; ctx.beginPath(); ctx.arc(f.x, f.y, f.r, 0, 7); ctx.fill(); }
+    else { ctx.fillStyle = `rgba(255,255,255,${a})`; ctx.beginPath(); ctx.arc(f.x, f.y, f.r, 0, 7); ctx.fill(); }
+  }
+  for (const f of S.floaters) { ctx.globalAlpha = clamp(f.life / f.max * 1.5, 0, 1); text(f.t, f.x, f.y, f.size, f.col); ctx.globalAlpha = 1; }
+  ctx.restore();
+
+  // big onomatopoeia
+  if (mode === 'sneeze' && S.sneeze.stage === 4) {
+    const k = S.sneeze.t - (S.sneeze.kind === 'nose' ? 1.5 : 1.3);
+    const sc = Math.min(1, k * 4) * (1 + Math.sin(clock * 30) * .03);
+    ctx.save(); ctx.translate(W / 2, H / 2 - 40); ctx.rotate(-.08); ctx.scale(sc, sc);
+    if (S.sneeze.kind === 'nose') { text('AAAH-CHOOOOO!!!', 0, 0, 96, '#ffd23f', 'center', '#000'); text('(bless you)', 0, 80, 30, '#fff'); }
+    else { text('PFFWEEEEEEE!!!', 0, 0, 92, '#80d8ff', 'center', '#000'); text('(…it came out of your EARS)', 0, 80, 30, '#fff'); }
+    ctx.restore();
+  }
+  if (S.flash > 0) { ctx.fillStyle = `rgba(255,255,255,${S.flash})`; ctx.fillRect(0, 0, W, H); }
+
+  // HUD
+  if (mode !== 'sneeze' || S.sneeze.stage < 4) {
+    bar(20, 18, 250, 26, S.T, S.T > 70 ? '#ff5252' : '#ff80ab', 'TICKLE');
+    bar(20, 54, 250, 26, S.P, S.P > 70 ? '#ff6d00' : '#ffb74d', S.P > 70 ? 'PRESSURE (ears!)' : 'PRESSURE');
+    text(`HOLD IT: ${S.left.toFixed(1)}s`, W - 20, 34, 28, S.left < 4 ? '#b9f6ca' : '#fff', 'right');
+    text(`${lvl + 1}/${LEVELS.length} · ${S.L.name}`, W - 20, 66, 15, '#ddd', 'right');
+    if (mode === 'won') { ctx.fillStyle = '#0007'; ctx.fillRect(0, H / 2 - 60, W, 120); text('YOU HELD IT.', W / 2, H / 2 - 10, 64, '#b9f6ca'); text('nobody noticed. nobody will ever know. nobody cares.', W / 2, H / 2 + 38, 22, '#fff'); }
+  }
+  if (S.msgT > 0 && mode !== 'won') {
+    ctx.globalAlpha = clamp(S.msgT * 2, 0, 1);
+    const lines = wrapLines(S.msg, 560, 19);
+    ctx.fillStyle = '#000b'; rr(W / 2 - 300, 95, 600, lines.length * 24 + 14, 12); ctx.fill();
+    lines.forEach((l, i) => text(l, W / 2, 109 + i * 24, 19, '#ffd23f', 'center', null));
+    ctx.globalAlpha = 1;
+  }
+}
+
+function drawAttract() {
+  // title screen background: a giant nose, wobbling
+  const g = ctx.createLinearGradient(0, 0, 0, H); g.addColorStop(0, '#2a2350'); g.addColorStop(1, '#17142a'); ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+  for (let i = 0; i < 14; i++) { const a = clock * .4 + i; emoji(['🪶', '🌶️', '🌸', '🐈', '🕸️', '🍃'][i % 6], (i * 97 + clock * 30 * (i % 3 + 1)) % (W + 100) - 50, 60 + (i * 53) % 420 + Math.sin(a) * 20, 34, Math.sin(a)); }
+}
+
+/* ---------------- FLOW / CARDS ---------------- */
+function showCard(html, onBtn) {
+  $('cardPanel').className = 'panel';
+  $('cardPanel').innerHTML = html; $('card').classList.add('show');
+  $('cardPanel').querySelectorAll('button[data-go]').forEach(b => b.onclick = () => { $('card').classList.remove('show'); onBtn(b.dataset.go); });
+}
+function intro(i) {
+  lvl = i; mode = 'intro'; S = null;
+  const L = LEVELS[i];
+  showCard(`<div class="small">SITUATION ${i + 1} OF ${LEVELS.length}</div><h2>${L.name}</h2><p>${L.intro}</p>
+    <p class="small">Survive <b>${L.dur} seconds</b> without sneezing.</p>
+    <button class="big" data-go="go">${pick(["I'm ready (I'm not)", 'Deep breath (NO)', 'Let’s do this', 'Clench nose'])}</button>`, () => { startLevel(i); });
+}
+function finishLevel(kind) {
+  mode = 'result'; qteEnd();
+  const L = LEVELS[lvl], hd = L[kind];
+  results.push({ kind, h: hd[0], sub: hd[1], lvl });
+  say('Breaking news. ' + hd[0] + '. ' + hd[1]);
+  const last = lvl === LEVELS.length - 1;
+  showCard(`<div class="masthead">The Daily Sniffle</div>
+    <div class="dateline"><span>Vol. ${lvl + 1}</span><span>${pick(['Today, probably', 'Moments ago', 'Still damp'])}</span><span>${pick(['Price: 1 tissue', 'Free (used)', '2 coins + 1 hanky'])}</span></div>
+    <div class="headline">${hd[0]}</div><div class="sub">${hd[1]}</div>
+    <div class="stamp ${kind === 'held' ? 'win' : 'lose'}">${kind === 'held' ? 'DIGNITY: KEPT' : kind === 'ear' ? 'DIGNITY: LEFT VIA EARS' : 'DIGNITY: AIRBORNE'}</div><br>
+    <button class="big" data-go="next">${last ? 'Read the full newspaper →' : pick(['Next disaster →', 'Onwards, damply →', 'Wipe face, continue →'])}</button>`,
+    () => { if ('speechSynthesis' in window) speechSynthesis.cancel(); last ? ending() : intro(lvl + 1); });
+  $('cardPanel').className = 'panel paper';
+}
+function ending() {
+  mode = 'end'; S = null;
+  const held = results.filter(r => r.kind === 'held').length;
+  const [title, desc] = RATINGS[held];
+  const sneezes = results.filter(r => r.kind === 'nose').length, ears = results.filter(r => r.kind === 'ear').length;
+  showCard(`<div class="masthead">The Daily Sniffle</div>
+    <div class="dateline"><span>Special Edition</span><span>"All the news that's fit to sneeze"</span><span>Tissues extra</span></div>
+    <div class="headline">Local Nose Rated: “${title}”</div><div class="sub">${desc}</div>
+    <ul class="list">${results.map(r => `<li>${r.kind === 'held' ? '✅' : r.kind === 'ear' ? '👂' : '🤧'} <b>${r.h}</b> — ${r.sub}</li>`).join('')}</ul>
+    <div class="small">Sneezes held: ${held}/${LEVELS.length} · Regular sneezes: ${sneezes} · Ear sneezes: ${ears} · Tissues used: ${sneezes * 7 + ears * 3 + 1}</div>
+    <button class="big" data-go="again">Sniff again ↻</button>`, () => { results = []; intro(0); });
+  $('cardPanel').className = 'panel paper';
+  say(`Special edition. Local nose rated: ${title}. ${desc}`);
+}
+$('playBtn').onclick = () => { ac(); $('title').classList.remove('show'); if (isTouch) $('touch').classList.add('show'); intro(0); };
+
+/* ---------------- LOOP ---------------- */
+let last = performance.now();
+function frame(now) {
+  const dt = Math.min(.05, (now - last) / 1000); last = now;
+  update(dt); draw();
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+// debugging / testing hook
+window.__sneeze = { get S() { return S; }, get mode() { return mode; }, startLevel, finishLevel, intro };
+})();
+</script>
+</body>
+</html>
