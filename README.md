@@ -40,7 +40,7 @@ Tastatur: `n` öffnet „Erfassen“, `Leertaste` startet den Fokus, `Strg/Cmd +
 
 ## Dateien
 - `index.html`: Einstieg
-- `styles.css`: Design-Tokens (hell/dunkel), Layout, reizarmer Modus
+- `styles.css`: Design-Tokens (Geist-Schrift) (hell/dunkel), Layout, reizarmer Modus
 - `app.js`: gesamte App-Logik
 - `manifest.webmanifest`, `sw.js`, `icon.svg`: PWA
 
