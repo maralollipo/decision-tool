@@ -1,6 +1,6 @@
 // Offline-Cache für Jetzt. – App-Shell zuerst aus dem Cache, dann aus dem Netz.
-const CACHE = 'jetzt-v1';
-const SHELL = ['./', './index.html', './styles.css', './app.js', './icon.svg', './manifest.webmanifest'];
+const CACHE = 'jetzt-v2';
+const SHELL = ['./', './index.html', './styles.css', './illustrations.js', './app.js', './icon.svg', './manifest.webmanifest'];
 self.addEventListener('install', e => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(SHELL))); self.skipWaiting(); });
 self.addEventListener('activate', e => { e.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k))))); self.clients.claim(); });
 self.addEventListener('fetch', e => {

@@ -68,22 +68,41 @@ const P = {
   scissors: '<circle cx="6" cy="6" r="2.8"/><circle cx="6" cy="18" r="2.8"/><path d="M8.2 7.8L20 19M8.2 16.2L20 5"/>',
   anchor: '<circle cx="12" cy="5" r="2"/><path d="M12 7v14M5 12H3a9 9 0 0018 0h-2M8 11h8"/>',
   heart: '<path d="M12 20s-7.5-4.6-7.5-10A4.2 4.2 0 0112 7.6 4.2 4.2 0 0119.5 10c0 5.4-7.5 10-7.5 10z"/>',
+  briefcase: '<rect x="3" y="7" width="18" height="13" rx="2.5"/><path d="M9 7V5.5A1.5 1.5 0 0110.5 4h3A1.5 1.5 0 0115 5.5V7M3 12.5h18"/>',
+  home: '<path d="M4 10.5L12 4l8 6.5V19a1 1 0 01-1 1h-4.5v-5.5h-5V20H5a1 1 0 01-1-1z"/>',
+  doc: '<path d="M7 3h7l5 5v12a1 1 0 01-1 1H7a1 1 0 01-1-1V4a1 1 0 011-1z"/><path d="M14 3v5h5M9.5 13h6M9.5 16.5h6"/>',
+  book: '<path d="M4 19V5.5A2.5 2.5 0 016.5 3H20v14H6.5A2.5 2.5 0 004 19.5 2.5 2.5 0 006.5 22H20v-5"/>',
+  palette: '<path d="M12 3a9 9 0 100 18c1.2 0 1.8-.9 1.8-1.8 0-1.3-1-1.6-1-2.7 0-1 .8-1.7 1.8-1.7H17a4 4 0 004-4C21 6.6 17 3 12 3z"/><circle cx="7.5" cy="11" r="1.2" fill="currentColor"/><circle cx="10" cy="7" r="1.2" fill="currentColor"/><circle cx="15" cy="7" r="1.2" fill="currentColor"/>',
+  chat: '<path d="M4 5h16v11H9l-5 4z"/><path d="M8 9.5h8M8 12.5h5"/>',
+  music: '<path d="M9 18V5l11-2v13"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="17.5" cy="16" r="2.5"/>',
+  run: '<circle cx="14.5" cy="4.5" r="1.8"/><path d="M6 20l3.5-5 3 2 1-5.5L9 10l-3 2.5M13.5 11.5l3 3H20"/>',
+  lotus: '<path d="M12 20c-4 0-8-2-9-6 3 0 6 1 9 6zM12 20c4 0 8-2 9-6-3 0-6 1-9 6zM12 20c-3-3-3-9 0-14 3 5 3 11 0 14z"/>',
+  coin: '<ellipse cx="12" cy="7" rx="7" ry="3"/><path d="M5 7v5c0 1.7 3.1 3 7 3s7-1.3 7-3V7M5 12v5c0 1.7 3.1 3 7 3s7-1.3 7-3v-5"/>',
+  sprout: '<path d="M12 21v-9"/><path d="M12 12C12 7 8.5 5 4 5c0 4.5 3 7 8 7zM12 10c0-4 3-6 8-6 0 4-3 6-8 6z"/>',
+  wrench: '<path d="M15 4a5 5 0 00-4.7 6.6L4 17v3h3l6.4-6.3A5 5 0 0020 9l-3 1-2-2 1-3z"/>',
+  plane: '<path d="M3 12l18-8-6 17-3-7z"/><path d="M12 14l9-10"/>',
+  pin: '<path d="M12 21s-6.5-6.2-6.5-11a6.5 6.5 0 0113 0c0 4.8-6.5 11-6.5 11z"/><circle cx="12" cy="10" r="2.3"/>',
   copy: '<rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5a1 1 0 00-1-1H5a1 1 0 00-1 1v10a1 1 0 001 1h3"/>',
 };
+const INIT_ICONS = ['sparkle', 'briefcase', 'leaf', 'home', 'doc', 'book', 'palette', 'chat', 'music', 'run', 'lotus', 'coin', 'sprout', 'wrench', 'plane', 'heart'];
+const LEGACY = { '✨': 'sparkle', '💼': 'briefcase', '🌿': 'leaf', '🏠': 'home', '📄': 'doc', '📚': 'book', '🎨': 'palette', '💬': 'chat', '🎵': 'music', '🏃': 'run', '🧘': 'lotus', '💰': 'coin', '🌱': 'sprout', '🔧': 'wrench', '✈️': 'plane', '❤️': 'heart' };
+const iKey = i => (i && P[i.icon] ? i.icon : (i && LEGACY[i.icon]) || 'sparkle');
+const iIcon = i => ic(iKey(i));
+const illu = (n, label) => (window.ILLU ? window.ILLU(n, label) : '');
 const ic = (n, cls = '') => `<svg class="i ${cls}" viewBox="0 0 24 24" aria-hidden="true">${P[n] || ''}</svg>`;
-const MARK = `<svg class="brand-mark" viewBox="0 0 48 48" aria-hidden="true"><defs><linearGradient id="mk" x1="0" y1="0" x2="1" y2="1"><stop offset="0" style="stop-color:var(--now-2)"/><stop offset="1" style="stop-color:var(--now)"/></linearGradient></defs><rect x="2" y="2" width="44" height="44" rx="13" style="fill:var(--ink)"/><circle cx="24" cy="24" r="12.5" fill="none" stroke="rgba(255,255,255,.14)" stroke-width="4.5"/><path d="M24 11.5A12.5 12.5 0 0136.5 24" fill="none" stroke="url(#mk)" stroke-width="4.5" stroke-linecap="round"/><circle cx="24" cy="24" r="4" fill="url(#mk)"/></svg>`;
+const MARK = `<svg class="brand-mark" viewBox="0 0 48 48" aria-hidden="true"><rect x="2" y="2" width="44" height="44" rx="13" style="fill:var(--ink)"/><circle cx="24" cy="24" r="12.5" fill="none" style="stroke:var(--bg)" stroke-opacity=".18" stroke-width="4.5"/><path d="M24 11.5A12.5 12.5 0 0136.5 24" fill="none" style="stroke:var(--now)" stroke-width="4.5" stroke-linecap="round"/><circle cx="24" cy="24" r="4" style="fill:var(--now)"/></svg>`;
 
 /* ================= Konstanten ================= */
 const COLORS = ['sage', 'sky', 'lav', 'sand', 'teal', 'clay'];
 const cvar = c => `var(--i-${COLORS.includes(c) ? c : 'sage'})`;
 const PRESETS = [
-  { name: 'Job & Karriere', icon: '💼', color: 'sky', kw: ['job', 'arbeit', 'chef', 'meeting', 'bericht', 'präsentation', 'kunde', 'mail', 'büro', 'bewerbung', 'projekt'] },
-  { name: 'Gesundheit', icon: '🌿', color: 'sage', kw: ['arzt', 'sport', 'laufen', 'yoga', 'tablette', 'schlaf', 'zahnarzt', 'training', 'therapie', 'spazier', 'medik'] },
-  { name: 'Zuhause', icon: '🏠', color: 'sand', kw: ['putzen', 'wäsche', 'aufräumen', 'einkauf', 'kochen', 'müll', 'küche', 'bad', 'spülmaschine', 'staubsaugen', 'reparier'] },
-  { name: 'Finanzen & Papierkram', icon: '📄', color: 'teal', kw: ['steuer', 'rechnung', 'überweis', 'bank', 'versicherung', 'formular', 'antrag', 'kündig', 'vertrag', 'elster'] },
-  { name: 'Studium & Lernen', icon: '📚', color: 'lav', kw: ['lernen', 'kurs', 'lesen', 'prüfung', 'uni', 'hausarbeit', 'kapitel', 'vorlesung', 'thesis', 'masterarbeit'] },
-  { name: 'Kreativprojekt', icon: '🎨', color: 'clay', kw: ['schreiben', 'malen', 'musik', 'zeichnen', 'portfolio', 'blog', 'video', 'foto', 'design'] },
-  { name: 'Menschen & Beziehungen', icon: '💬', color: 'clay', kw: ['mama', 'papa', 'freund', 'anruf', 'geburtstag', 'treffen', 'oma', 'schwester', 'bruder', 'geschenk'] },
+  { name: 'Job & Karriere', icon: 'briefcase', color: 'sky', kw: ['job', 'arbeit', 'chef', 'meeting', 'bericht', 'präsentation', 'kunde', 'mail', 'büro', 'bewerbung', 'projekt'] },
+  { name: 'Gesundheit', icon: 'leaf', color: 'sage', kw: ['arzt', 'sport', 'laufen', 'yoga', 'tablette', 'schlaf', 'zahnarzt', 'training', 'therapie', 'spazier', 'medik'] },
+  { name: 'Zuhause', icon: 'home', color: 'sand', kw: ['putzen', 'wäsche', 'aufräumen', 'einkauf', 'kochen', 'müll', 'küche', 'bad', 'spülmaschine', 'staubsaugen', 'reparier'] },
+  { name: 'Finanzen & Papierkram', icon: 'doc', color: 'teal', kw: ['steuer', 'rechnung', 'überweis', 'bank', 'versicherung', 'formular', 'antrag', 'kündig', 'vertrag', 'elster'] },
+  { name: 'Studium & Lernen', icon: 'book', color: 'lav', kw: ['lernen', 'kurs', 'lesen', 'prüfung', 'uni', 'hausarbeit', 'kapitel', 'vorlesung', 'thesis', 'masterarbeit'] },
+  { name: 'Kreativprojekt', icon: 'palette', color: 'clay', kw: ['schreiben', 'malen', 'musik', 'zeichnen', 'portfolio', 'blog', 'video', 'foto', 'design'] },
+  { name: 'Menschen & Beziehungen', icon: 'chat', color: 'clay', kw: ['mama', 'papa', 'freund', 'anruf', 'geburtstag', 'treffen', 'oma', 'schwester', 'bruder', 'geschenk'] },
 ];
 const PROBLEMS = [
   { id: 'start', em: 'door', t: 'Anfangen', d: 'Ich weiß, was zu tun ist, komme aber nicht rein.' },
@@ -144,7 +163,7 @@ const base = () => ({
 });
 let S = base();
 function load() {
-  try { const raw = localStorage.getItem(KEY); if (raw) { const d = JSON.parse(raw); S = Object.assign(base(), d); S.profile = Object.assign(base().profile, d.profile || {}); S.ui = Object.assign({ view: 'jetzt' }, d.ui || {}); S.notif = Object.assign(base().notif, d.notif || {}); } } catch (e) { /* frischer Start */ }
+  try { const raw = localStorage.getItem(KEY); if (raw) { const d = JSON.parse(raw); S = Object.assign(base(), d); S.profile = Object.assign(base().profile, d.profile || {}); S.ui = Object.assign({ view: 'jetzt' }, d.ui || {}); S.notif = Object.assign(base().notif, d.notif || {}); S.initiatives.forEach(i => { i.icon = iKey(i); }); } } catch (e) { /* frischer Start */ }
 }
 function save() { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) { /* Speicher blockiert – App läuft trotzdem */ } }
 
@@ -484,11 +503,12 @@ function bindAfter() {
 
 function initChip(id) {
   const i = initById(id); if (!i) return '';
-  return `<span class="chip" style="--c:${cvar(i.color)}"><span class="dot"></span>${esc(i.icon)} ${esc(i.name)}</span>`;
+  return `<span class="chip" style="--c:${cvar(i.color)}">${iIcon(i)}${esc(i.name)}</span>`;
 }
+let ringN = 0;
 function ringSVG(frac, o) {
   // Ring mit Verlauf und Minutenstrichen; frac = verbleibender Anteil
-  const { r, w, id, tickR } = o; const C = 2 * Math.PI * r; const cx = 70;
+  const { r, w, tickR } = o; const id = o.id + '-' + (++ringN); const C = 2 * Math.PI * r; const cx = 70;
   let ticks = '';
   for (let k = 0; k < 60; k++) { const a = k / 60 * Math.PI * 2, r1 = tickR, r2 = tickR + (k % 5 ? 3 : 6); ticks += `<line class="tick" x1="${(cx + Math.cos(a) * r1).toFixed(2)}" y1="${(cx + Math.sin(a) * r1).toFixed(2)}" x2="${(cx + Math.cos(a) * r2).toFixed(2)}" y2="${(cx + Math.sin(a) * r2).toFixed(2)}" stroke-width="${k % 5 ? 0.8 : 1.3}"/>`; }
   return `<svg viewBox="0 0 140 140"><defs><linearGradient id="${id}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" style="stop-color:var(--now-2)"/><stop offset="1" style="stop-color:var(--c, var(--now))"/></linearGradient></defs>${ticks}<circle class="track" cx="${cx}" cy="${cx}" r="${r}" fill="none" stroke-width="${w}"/><circle class="fill" ${o.fillId ? `id="${o.fillId}"` : ''} cx="${cx}" cy="${cx}" r="${r}" fill="none" stroke="url(#${id})" stroke-width="${w}" stroke-linecap="round" stroke-dasharray="${C.toFixed(2)}" stroke-dashoffset="${(C * (1 - clamp(frac, 0, 1))).toFixed(2)}" data-c="${C.toFixed(2)}"/></svg>`;
@@ -556,9 +576,9 @@ views.jetzt = () => {
     const done = doneToday().length;
     const sg = suggest(3);
     main = `<section class="empty">
-      ${done ? `<span class="chip grow">${ic('check')} Heute geschafft: ${done}</span><h2>Alles für jetzt erledigt.</h2><p>Du darfst aufhören. Oder dir noch etwas Kleines holen, wenn du Lust hast.</p>`
-      : `<span class="chip now">${ic('sparkle')} Frischer Start</span><h2>Womit fangen wir an?</h2><p>Such dir eins aus. Es muss nicht das Wichtigste sein, nur ein Anfang.</p>`}
-      ${sg.length ? `<div class="sugg">${sg.map(t => { const i = initById(t.initiative); return `<button data-a="takeToday" data-id="${t.id}"><span class="em" style="--c:${i ? cvar(i.color) : 'var(--ink-3)'}">${i ? esc(i.icon) : ic('sparkle')}</span><span>${esc(t.title)}</span><span class="m">${taskMin(t)} Min</span></button>`; }).join('')}</div>` : ''}
+      ${done ? `${illu('summit')}<span class="chip grow">${ic('check')} Heute geschafft: ${done}</span><h2>Alles für jetzt erledigt.</h2><p>Du darfst aufhören. Oder dir noch etwas Kleines holen, wenn du Lust hast.</p>`
+      : `${illu('desk')}<span class="chip now">${ic('sparkle')} Frischer Start</span><h2>Womit fangen wir an?</h2><p>Such dir eins aus. Es muss nicht das Wichtigste sein, nur ein Anfang.</p>`}
+      ${sg.length ? `<div class="sugg">${sg.map(t => { const i = initById(t.initiative); return `<button data-a="takeToday" data-id="${t.id}"><span class="em" style="--c:${i ? cvar(i.color) : 'var(--ink-3)'}">${i ? iIcon(i) : ic('sparkle')}</span><span>${esc(t.title)}</span><span class="m">${taskMin(t)} Min</span></button>`; }).join('')}</div>` : ''}
       <div class="row" style="justify-content:center"><button class="btn primary" data-a="capture">${ic('mic')} Etwas erfassen</button>${S.routines.length ? `<button class="btn" data-a="view" data-v="routinen">${ic('routine')} Routine starten</button>` : ''}</div>
     </section>`;
   }
@@ -570,7 +590,7 @@ views.jetzt = () => {
   const imps = todayTasks().filter(t => t.important).concat(doneToday().filter(t => t.important && t.type === 'task'));
   const impDone = imps.filter(t => t.status === 'done').length;
   const impList = `<section class="card"><div class="card-h"><h3>Heute wichtig</h3><span class="muted num">${imps.length ? `${impDone}/${imps.length}` : `max. ${S.profile.maxImp}`}</span></div>
-    ${imps.length ? `<div class="important">${imps.map(t => `<div class="imp-row ${t.status === 'done' ? 'done' : ''}"><button class="check ${t.status === 'done' ? 'on' : ''}" data-a="complete" data-id="${t.id}" aria-label="${t.status === 'done' ? 'Erledigt' : 'Als erledigt markieren'}">${ic('check')}</button><span class="t">${esc(t.title)}</span><span class="d">${t.status === 'done' ? '✓' : remainingMin(t) + '′'}</span></div>`).join('')}</div>` : `<p class="muted" style="font-size:14px">Noch nichts markiert. Im Tag mit ★ wählen – eins reicht schon.</p>`}</section>`;
+    ${imps.length ? `<div class="important">${imps.map(t => `<div class="imp-row ${t.status === 'done' ? 'done' : ''}"><button class="check ${t.status === 'done' ? 'on' : ''}" data-a="complete" data-id="${t.id}" aria-label="${t.status === 'done' ? 'Erledigt' : 'Als erledigt markieren'}">${ic('check')}</button><span class="t">${esc(t.title)}</span><span class="d">${t.status === 'done' ? ic('check') : remainingMin(t) + '′'}</span></div>`).join('')}</div>` : `<p class="muted" style="font-size:14px">Noch nichts markiert. Im Tag mit dem Stern wählen. Eins reicht schon.</p>`}</section>`;
   const hour2 = new Date().getHours();
   const evening = hour2 >= 18 && !d.review ? `<div class="banner grow"><span class="tile" style="--c:var(--grow)">${ic('moon')}</span><div class="tx"><b>Feierabend in Sicht</b><span>Eine Minute Rückblick, nur was geklappt hat.</span></div><button class="btn small" data-a="sheet" data-s="evening">Abschließen</button></div>` : '';
   const morning = !d.checkin && hour2 < 14 ? `<div class="banner now"><span class="tile" style="--c:var(--now)">${ic('sunrise')}</span><div class="tx"><b>Morgen-Check-in</b><span>Zwei Minuten: Energie wählen, Tag bestätigen.</span></div><button class="btn small" data-a="sheet" data-s="morning">Starten</button></div>` : '';
@@ -594,7 +614,7 @@ views.tag = () => {
     const top = y(Math.max(b.s, sc.ds)), hgt = Math.max(14, (Math.min(b.e, sc.de) - Math.max(b.s, sc.ds)) * PX - 3);
     if (b.kind === 'buffer') return `<div class="tl-block buffer" style="top:${top}px;height:${Math.max(8, hgt)}px">${hgt > 13 && b.label === 'Übergang' ? b.label : ''}</div>`;
     const i = initById(b.t.initiative);
-    return `<button class="tl-block ${b.kind} ${b.over ? 'over' : ''} ${b.t.important ? 'important' : ''} ${hgt < 34 ? 'compact' : ''}" style="top:${top}px;height:${hgt}px;--c:${i ? cvar(i.color) : 'var(--ink-3)'}" data-a="sheet" data-s="edit" data-id="${b.t.id}"><span class="tt">${b.kind === 'event' ? '📍 ' : ''}${esc(b.t.title)}</span><span class="tm">${hm(b.s)}${hgt >= 34 ? '–' + hm(b.e) : ''}</span></button>`;
+    return `<button class="tl-block ${b.kind} ${b.over ? 'over' : ''} ${b.t.important ? 'important' : ''} ${hgt < 34 ? 'compact' : ''}" style="top:${top}px;height:${hgt}px;--c:${i ? cvar(i.color) : 'var(--ink-3)'}" data-a="sheet" data-s="edit" data-id="${b.t.id}"><span class="tt">${b.kind === 'event' ? ic('pin') : ''}${esc(b.t.title)}</span><span class="tm">${hm(b.s)}${hgt >= 34 ? '–' + hm(b.e) : ''}</span></button>`;
   }).join('');
   const pastH = clamp(y(sc.now), 0, H);
   const nowLine = sc.now >= sc.ds && sc.now <= sc.de ? `<div class="tl-now" style="top:${y(sc.now)}px"><span>Jetzt ${hm(sc.now)}</span></div>` : '';
@@ -603,7 +623,7 @@ views.tag = () => {
   const open = openToday(); const imp = open.filter(t => t.important); const rest = open.filter(t => !t.important);
   const row = (t, idx, arr) => { const i = initById(t.initiative); return `<div class="task-row ${t.important ? '' : 'muted'}" style="--c:${i ? cvar(i.color) : 'var(--line)'}">
     <button class="check" data-a="complete" data-id="${t.id}" aria-label="Erledigt">${ic('check')}</button>
-    <div><div class="t">${esc(t.title)}</div><div class="meta"><span>${remainingMin(t)} Min</span>${t.steps.length ? `<span>· ${t.steps.filter(s => s.done).length}/${t.steps.length} Schritte</span>` : ''}${i ? `<span>· ${esc(i.icon)} ${esc(i.name)}</span>` : ''}${t.deadline ? `<span>· bis ${esc(fmtDate(t.deadline))}</span>` : ''}</div></div>
+    <div><div class="t">${esc(t.title)}</div><div class="meta"><span>${remainingMin(t)} Min</span>${t.steps.length ? `<span>· ${t.steps.filter(s => s.done).length}/${t.steps.length} Schritte</span>` : ''}${i ? `<span>· ${esc(i.name)}</span>` : ''}${t.deadline ? `<span>· bis ${esc(fmtDate(t.deadline))}</span>` : ''}</div></div>
     <div class="acts">
       <button class="icon-btn sm star" data-a="star" data-id="${t.id}" aria-pressed="${t.important}" aria-label="Heute wichtig">${ic('star')}</button>
       <button class="icon-btn sm" data-a="move" data-id="${t.id}" data-d="-1" aria-label="Nach oben" ${idx === 0 ? 'disabled' : ''}>${ic('up')}</button>
@@ -620,7 +640,7 @@ views.tag = () => {
     ${over ? `<div class="hint">${ic('sparkle')}<span>Mehr geplant, als der Tag hergibt. Das ist normal, nicht dein Fehler.</span><button class="btn small" data-a="trim">Ich räume auf</button></div>` : `<div class="muted" style="font-size:15px">Passt. Mit Puffern zwischen allem.</div>`}
   </section>
   <div class="timeline"><div class="tl-inner" style="height:${H}px"><div class="tl-past" style="height:${pastH}px"></div>${hours}${blocks}${endLine}${nowLine}</div></div>
-  <section class="sec"><div class="sec-h"><h2>Heute wichtig</h2><span class="muted">${imp.length ? `${imp.length} von höchstens ${S.profile.maxImp}` : 'Tippe auf ★, um etwas zu wählen'}</span></div>
+  <section class="sec"><div class="sec-h"><h2>Heute wichtig</h2><span class="muted">${imp.length ? `${imp.length} von höchstens ${S.profile.maxImp}` : 'Tippe auf den Stern, um etwas zu wählen'}</span></div>
     <div class="task-list">${imp.map(row).join('') || '<p class="muted">Noch nichts markiert. Eins reicht schon.</p>'}</div></section>
   <section class="sec"><div class="sec-h"><h2>Wenn Zeit bleibt</h2></div>
     <div class="task-list">${rest.map(row).join('') || '<p class="muted">Leer. Auch gut.</p>'}</div></section>
@@ -639,7 +659,7 @@ views.initiativen = () => {
     const sprouts = Array.from({ length: Math.min(24, g) }, (_, k) => `<i style="height:${Math.round(8 + rand(k + i.name.length) * 18)}px"></i>`).join('');
     return `<article class="init-card ${i.focus ? 'is-focus' : ''}" style="--c:${cvar(i.color)}">
       ${i.focus ? `<span class="chip focus-badge" style="--c:${cvar(i.color)}">${ic('star')} Fokus</span>` : ''}
-      <div class="init-top"><div class="init-icon">${esc(i.icon)}</div><div><h3>${esc(i.name)}</h3></div></div>
+      <div class="init-top"><div class="init-icon">${iIcon(i)}</div><div><h3>${esc(i.name)}</h3></div></div>
       ${i.why ? `<p class="why">„${esc(i.why)}“</p>` : `<button class="btn ghost small" data-a="sheet" data-s="initEdit" data-id="${i.id}" style="justify-self:start">${ic('feather')} Warum ist mir das wichtig?</button>`}
       <div class="init-next">${nt ? `<span class="eyebrow">Nächster Schritt</span><span class="t">${esc(st ? st.text : nt.title)}</span>${st ? `<span class="muted" style="font-size:14px">aus „${esc(nt.title)}“</span>` : ''}` : `<span class="muted">Hier liegt gerade nichts an. Das darf so sein.</span>`}</div>
       <div class="sprouts" aria-hidden="true">${sprouts}</div>
@@ -648,8 +668,8 @@ views.initiativen = () => {
         <button class="icon-btn sm" data-a="sheet" data-s="initEdit" data-id="${i.id}" aria-label="${esc(i.name)} bearbeiten">${ic('edit')}</button></span></div>
     </article>`;
   }).join('');
-  return `<header class="top"><div><div class="date">Deine Fokusbereiche</div><h1>Initiativen</h1></div></header>
-  <p class="lead">Wenige Bereiche, die dir wichtig sind. Keine Ordner, keine Unterprojekte. Wähle eine Initiative als Fokus, dann schlägt dir die App zuerst Schritte daraus vor.</p>
+  return `<section class="page-hero"><div class="ph-text"><div class="date">Deine Fokusbereiche</div><h1>Initiativen</h1>
+  <p class="lead">Wenige Bereiche, die dir wichtig sind. Keine Ordner, keine Unterprojekte. Wähle eine Initiative als Fokus, dann schlägt dir die App zuerst Schritte daraus vor.</p></div>${illu('paths')}</section>
   <div class="init-grid">${cards}${S.initiatives.length < 6 ? `<button class="init-add" data-a="sheet" data-s="initEdit">${ic('plus')}<span>Initiative hinzufügen</span><small class="muted">höchstens 6</small></button>` : ''}</div>`;
 };
 
@@ -658,8 +678,9 @@ views.routinen = () => {
   const list = S.routines.map(r => `<article class="routine"><div class="row between"><h3 style="font-size:21px">${esc(r.name)}</h3><span class="muted" style="font-size:14px">${r.count ? `schon ${r.count}× gemacht` : 'noch neu'}</span></div>
     <div class="chain"><span class="lnk trig">Wenn ${esc(r.trigger)}</span>${r.steps.map(s => `<span class="arr">→</span><span class="lnk">${esc(s.text)} <small>${s.min}′</small></span>`).join('')}</div>
     <div class="row"><button class="btn now" data-a="runRoutine" data-id="${r.id}">${ic('play')} Starten</button><button class="btn ghost small" data-a="sheet" data-s="routineEdit" data-id="${r.id}">${ic('edit')} Bearbeiten</button><span class="muted" style="margin-left:auto;font-size:14px">≈ ${r.steps.reduce((a, s) => a + (+s.min || 0), 0)} Min</span></div></article>`).join('');
-  return `<header class="top"><div><div class="date">Wenn-Dann-Ketten</div><h1>Routinen</h1></div><button class="btn small" data-a="sheet" data-s="routineEdit">${ic('plus')} Neu</button></header>
+  return `<section class="page-hero"><div class="ph-text"><div class="date">Wenn-Dann-Ketten</div><h1>Routinen</h1>
   <p class="lead">Eine Handlung wird an einen festen Auslöser gekoppelt, damit es nicht an Willenskraft hängt. Ein ausgelassener Tag ändert nichts: Hier zählt nur, wie oft es schon geklappt hat.</p>
+  <div><button class="btn" data-a="sheet" data-s="routineEdit">${ic('plus')} Neue Routine</button></div></div>${illu('steps')}</section>
   <div class="stack">${list || '<p class="muted">Noch keine Routine.</p>'}</div>`;
 };
 
@@ -671,8 +692,8 @@ views.spaeter = () => {
     <button class="icon-btn sm" data-a="sheet" data-s="edit" data-id="${t.id}" aria-label="Bearbeiten">${ic('edit')}</button>
     <button class="icon-btn sm" data-a="drop" data-id="${t.id}" aria-label="Brauch ich nicht mehr">${ic('x')}</button></div>`; }).join('');
   const notes = S.notes.map(n => `<div class="note">${ic('feather')}<p>${esc(n.text)}</p><button class="icon-btn sm" data-a="dropNote" data-id="${n.id}" aria-label="Notiz löschen">${ic('x')}</button></div>`).join('');
-  return `<header class="top"><div><div class="date">Ablage ohne Druck</div><h1>Später</h1></div></header>
-  <p class="lead">Hier liegt alles, was gerade nicht dran ist. Kein Zähler, keine Reihenfolge, nichts ist überfällig.</p>
+  return `<section class="page-hero"><div class="ph-text"><div class="date">Ablage ohne Druck</div><h1>Später</h1>
+  <p class="lead">Hier liegt alles, was gerade nicht dran ist. Kein Zähler, keine Reihenfolge, nichts ist überfällig.</p></div>${illu('box')}</section>
   ${lt.length ? `<button class="btn primary big" data-a="sheet" data-s="suggestOne">${ic('sparkle')} Mir eins vorschlagen</button>` : ''}
   <div class="later-list">${items || '<p class="muted">Leer. Neues landet hier, sobald du es erfasst und nicht für heute einplanst.</p>'}</div>
   ${notes ? `<section class="sec"><div class="sec-h"><h2>Notizen</h2></div><div class="later-list">${notes}</div></section>` : ''}`;
@@ -693,7 +714,7 @@ function focusView() {
   const st = nextStep(t);
   const mm = Math.floor(left / 60), ss = Math.floor(left % 60);
   return `<section class="focus ${animFocus ? 'anim' : ''}" role="dialog" aria-label="Fokusmodus" style="--c:${i ? cvar(i.color) : 'var(--now)'}">
-    <div class="focus-top"><span class="eyebrow">Fokus${i ? ' · ' + esc(i.icon + ' ' + i.name) : ''}</span>
+    <div class="focus-top"><span class="eyebrow">Fokus${i ? ' · ' + esc(i.name) : ''}</span>
       <div class="row"><button class="btn ghost small" data-a="noise" aria-pressed="${!!f.noise}">${ic('sound')} <span>${f.noise === 'brown' ? 'Rauschen' : f.noise === 'rain' ? 'Regen' : 'Ton aus'}</span></button>
       <button class="btn ghost small" data-a="buddy" aria-pressed="${!!f.buddy}">${ic('feather')} Begleiter</button>
       <button class="icon-btn" data-a="exitFocus" aria-label="Fokus verlassen">${ic('x')}</button></div></div>
@@ -753,14 +774,14 @@ function closeSheet() { if (recog) { try { recog.stop(); } catch (e) { } recog =
 sheets.capture = d => {
   const hasSpeech = !!(window.SpeechRecognition || window.webkitSpeechRecognition);
   const items = capture.items;
-  const initOpts = (it, k) => S.initiatives.map(i => `<button class="chip" style="--c:${cvar(i.color)}" aria-pressed="${it.initiative === i.id}" data-a="capInit" data-k="${k}" data-id="${i.id}"><span class="dot"></span>${esc(i.icon)}</button>`).join('');
+  const initOpts = (it, k) => S.initiatives.map(i => `<button class="chip" style="--c:${cvar(i.color)}" aria-pressed="${it.initiative === i.id}" data-a="capInit" data-k="${k}" data-id="${i.id}" aria-label="${esc(i.name)}">${iIcon(i)}${esc(i.name.split(' ')[0])}</button>`).join('');
   return `${sheetHead('Was schwirrt dir im Kopf?', 'Einfach alles raus. Mehrere Dinge mit Komma oder neuer Zeile trennen. Ich sortiere.')}
   <div class="row" style="align-items:flex-start;flex-wrap:nowrap">
     <textarea id="cap-text" class="input" placeholder="z. B. Steuer anfangen, Zahnarzt morgen um 9:30, Mama anrufen 10 min, Notiz: Geschenkidee Buch" aria-label="Gedanken erfassen">${esc(capture.text)}</textarea>
     ${hasSpeech ? `<button class="mic ${recog ? 'rec' : ''}" data-a="mic" aria-label="${recog ? 'Aufnahme stoppen' : 'Per Sprache erfassen'}">${ic(recog ? 'pause' : 'mic')}</button>` : ''}
   </div>
   ${items.length ? `<div class="cap-preview"><span class="eyebrow">Vorschau · ${items.length === 1 ? '1 Eintrag' : items.length + ' Einträge'}</span>${items.map((it, k) => `<div class="cap-item">
-      <div class="row between"><span class="t">${esc(it.title)}</span><span class="muted" style="font-size:14px">${it.type === 'event' ? `📍 ${it.time}${it.date !== T() ? ' · ' + fmtDate(it.date) : ''}` : it.type === 'note' ? 'Notiz' : `${it.minutes ? it.minutes + ' Min' : ''}${it.date !== T() ? ' · ' + fmtDate(it.date) : ''}`}</span></div>
+      <div class="row between"><span class="t">${esc(it.title)}</span><span class="muted" style="font-size:14px">${it.type === 'event' ? `${ic('pin')} ${it.time}${it.date !== T() ? ' · ' + fmtDate(it.date) : ''}` : it.type === 'note' ? 'Notiz' : `${it.minutes ? it.minutes + ' Min' : ''}${it.date !== T() ? ' · ' + fmtDate(it.date) : ''}`}</span></div>
       <div class="opts">
         ${[['task', 'Aufgabe'], ['event', 'Termin'], ['note', 'Notiz']].map(([v, l]) => `<button class="chip plain" aria-pressed="${it.type === v}" data-a="capType" data-k="${k}" data-v="${v}" style="${it.type === v ? 'background:var(--ink);color:var(--bg)' : ''}">${l}</button>`).join('')}
         ${it.type === 'task' ? `<button class="chip plain" data-a="capWhen" data-k="${k}" style="${it.when === 'later' ? '' : 'background:var(--now-soft);color:var(--now-ink)'}">${it.when === 'later' ? 'Später' : 'Heute'}</button>` : ''}
@@ -828,7 +849,7 @@ sheets.breakdown = d => {
       <span class="row" style="gap:4px;flex-wrap:nowrap"><input class="min" type="number" min="1" max="120" data-k="${k}" data-f="min" value="${s.min}" aria-label="Minuten"><small class="muted">Min</small></span>
       <span class="ops"><button class="icon-btn sm" data-a="bdMove" data-k="${k}" data-d="-1" aria-label="Nach oben" ${k === 0 ? 'disabled' : ''}>${ic('up')}</button><button class="icon-btn sm" data-a="bdMove" data-k="${k}" data-d="1" aria-label="Nach unten" ${k === steps.length - 1 ? 'disabled' : ''}>${ic('down')}</button><button class="icon-btn sm" data-a="bdDel" data-k="${k}" aria-label="Schritt entfernen">${ic('trash')}</button></span>
     </div>`).join('')}</div>
-  <div class="row between"><button class="btn ghost small" data-a="bdAdd">${ic('plus')} Schritt</button><span class="muted">Zusammen ≈ <b class="num">${dur(total)}</b>${steps[0] && steps[0].min <= 2 ? ' · erster Schritt ≤ 2 Min ✓' : ''}</span></div>
+  <div class="row between"><button class="btn ghost small" data-a="bdAdd">${ic('plus')} Schritt</button><span class="muted">Zusammen ≈ <b class="num">${dur(total)}</b>${steps[0] && steps[0].min <= 2 ? ' · erster Schritt ≤ 2 Min' : ''}</span></div>
   <div class="row end"><button class="btn ghost" data-a="close">Abbrechen</button><button class="btn primary" data-a="bdSave">${ic('check')} Übernehmen</button></div>`;
 };
 function openBreakdown(id, level) {
@@ -889,7 +910,7 @@ sheets.edit = d => {
       ${ev ? `<div class="field"><label for="e-time">Uhrzeit</label><input id="e-time" class="input" type="time" name="time" value="${esc(t.time || '')}" required></div>` : `<div class="field"><label for="e-en">Energie nötig</label><select id="e-en" class="input" name="energy">${[['low', 'Wenig'], ['mid', 'Mittel'], ['high', 'Viel']].map(([v, l]) => `<option value="${v}" ${t.energy === v ? 'selected' : ''}>${l}</option>`).join('')}</select></div>`}
       <div class="field"><label for="e-min">Dauer (Min)</label><input id="e-min" class="input" type="number" min="5" max="480" step="5" name="minutes" value="${t.minutes || 25}"></div>
     </div>
-    <div class="field"><span class="lbl">Initiative</span><div class="row" style="gap:6px">${S.initiatives.map(i => `<label class="chip" style="--c:${cvar(i.color)};cursor:pointer"><input type="radio" name="initiative" value="${i.id}" ${t.initiative === i.id ? 'checked' : ''} style="accent-color:${cvar(i.color)}">${esc(i.icon)} ${esc(i.name)}</label>`).join('')}<label class="chip plain" style="cursor:pointer"><input type="radio" name="initiative" value="" ${!t.initiative ? 'checked' : ''}>Keine</label></div></div>
+    <div class="field"><span class="lbl">Initiative</span><div class="row" style="gap:6px">${S.initiatives.map(i => `<label class="chip" style="--c:${cvar(i.color)};cursor:pointer"><input type="radio" name="initiative" value="${i.id}" ${t.initiative === i.id ? 'checked' : ''} style="accent-color:${cvar(i.color)}">${iIcon(i)} ${esc(i.name)}</label>`).join('')}<label class="chip plain" style="cursor:pointer"><input type="radio" name="initiative" value="" ${!t.initiative ? 'checked' : ''}>Keine</label></div></div>
     ${ev ? `<div class="field"><label for="e-date">Tag</label><input id="e-date" class="input" type="date" name="date" value="${esc(t.date)}"></div>` : `
     <div class="field"><label for="e-if">Wenn-Dann-Anker <span class="muted" style="font-weight:400">(optional)</span></label><input id="e-if" class="input" name="ifthen" value="${esc(t.ifthen || '')}" placeholder="z. B. ich vom Mittagessen zurück bin"><span class="help">„Wenn …, dann fange ich an.“ Das koppelt den Start an einen Moment statt an Willenskraft.</span></div>
     <div class="field"><label for="e-dl">Echte Frist <span class="muted" style="font-weight:400">(nur wenn es eine gibt)</span></label><input id="e-dl" class="input" type="date" name="deadline" value="${esc(t.deadline || '')}"></div>`}
@@ -907,7 +928,7 @@ sheets.morning = () => {
   return `${sheetHead('Guten Morgen.', 'Zwei Fragen, dann bist du fertig. Alles optional.')}
   <div class="field"><span class="lbl">Wie ist deine Energie gerade?</span>
     <div class="seg">${Object.entries(ENERGY).map(([k, v]) => `<button data-a="energy" data-v="${k}" aria-pressed="${d.energy === k}"><span class="em">${ic(v.em)}</span>${v.t}<small>${k === 'low' ? 'leichte Sachen zuerst' : k === 'mid' ? 'normaler Tag' : 'gut für Schweres'}</small></button>`).join('')}</div></div>
-  <div class="field"><span class="lbl">Mein Vorschlag für heute</span><span class="help">★ = heute wichtig (höchstens ${S.profile.maxImp}). Wegtippen legt es auf später.</span>
+  <div class="field"><span class="lbl">Mein Vorschlag für heute</span><span class="help">Stern = heute wichtig (höchstens ${S.profile.maxImp}). Wegtippen legt es auf später.</span>
     <div class="task-list">${open.map(t => { const i = initById(t.initiative); return `<div class="task-row ${t.important ? '' : 'muted'}" style="--c:${i ? cvar(i.color) : 'var(--line)'}"><button class="icon-btn sm star" data-a="star" data-id="${t.id}" aria-pressed="${t.important}" aria-label="Heute wichtig">${ic('star')}</button><div><div class="t">${esc(t.title)}</div><div class="meta"><span>${remainingMin(t)} Min</span>${t.carried ? '<span>· von gestern mitgenommen</span>' : ''}</div></div><div class="acts"><button class="icon-btn sm" data-a="toLater" data-id="${t.id}" aria-label="Auf später">${ic('x')}</button></div></div>`; }).join('') || '<p class="muted">Noch nichts für heute.</p>'}</div>
     ${sg.length ? `<span class="help" style="margin-top:6px">Passt vielleicht${d.energy === 'low' ? ' (leicht)' : ''}:</span><div class="row" style="gap:6px">${sg.map(t => `<button class="chip plain" data-a="takeToday" data-id="${t.id}" data-stay="1">${ic('plus')} ${esc(t.title)}</button>`).join('')}</div>` : ''}
   </div>
@@ -919,6 +940,7 @@ sheets.evening = () => {
   const d = today(); const done = doneToday(); const q = REFLECT[new Date().getDate() % REFLECT.length];
   const left = openToday().slice(0, 3);
   return `${sheetHead('Heute geschafft', done.length ? `${done.length === 1 ? '1 Sache' : done.length + ' Dinge'} und ${d.steps} kleine Schritte. Das zählt.` : `${d.steps ? d.steps + ' kleine Schritte. ' : ''}Auch Tage, an denen wenig ging, gehören dazu.`)}
+  <div class="sheet-illu">${illu('night')}</div>
   ${S.profile.reward === 'garten' ? `<div class="garden-wrap">${gardenSVG()}<div class="garden-cap"><span>Dein Garten ist heute um ${d.steps} gewachsen</span><span class="num">insgesamt ${S.growth}</span></div></div>` : ''}
   ${done.length ? `<div class="important">${done.map(t => `<div class="imp-row done"><span class="check on">${ic('check')}</span><span class="t">${esc(t.title)}</span></div>`).join('')}</div>` : ''}
   <div class="field"><label for="ev-r">${q}</label><textarea id="ev-r" class="input" style="min-height:80px" placeholder="Ein Satz reicht.">${esc(d.reflection || '')}</textarea></div>
@@ -930,9 +952,10 @@ sheets.restart = () => {
   const sg = suggest(3);
   const open = openToday();
   return `${sheetHead('Neuer Start.', 'Der Rest des Tages ist frisch aufgebaut. Was liegen geblieben ist, wartet still in „Später“.')}
+  <div class="sheet-illu">${illu('sunrise')}</div>
   <div class="sugg" style="max-width:none">
     ${open.map(t => `<button data-a="focusClose" data-id="${t.id}"><span class="em" style="--c:var(--now)">${ic('star')}</span><span>${esc(t.title)}</span><span class="m">${remainingMin(t)} Min</span></button>`).join('')}
-    ${sg.map(t => { const i = initById(t.initiative); return `<button data-a="takeToday" data-id="${t.id}"><span class="em" style="--c:${i ? cvar(i.color) : 'var(--ink-3)'}">${i ? esc(i.icon) : ic('sparkle')}</span><span>${esc(t.title)}</span><span class="m">${taskMin(t)} Min</span></button>`; }).join('')}
+    ${sg.map(t => { const i = initById(t.initiative); return `<button data-a="takeToday" data-id="${t.id}"><span class="em" style="--c:${i ? cvar(i.color) : 'var(--ink-3)'}">${i ? iIcon(i) : ic('sparkle')}</span><span>${esc(t.title)}</span><span class="m">${taskMin(t)} Min</span></button>`; }).join('')}
   </div>
   <div class="row end"><button class="btn ghost" data-a="capture">${ic('mic')} Etwas Neues</button><button class="btn primary" data-a="close">Gut so</button></div>`;
 };
@@ -940,8 +963,9 @@ sheets.restart = () => {
 sheets.welcome = () => {
   const sg = suggest(3);
   return `${sheetHead('Schön, dass du wieder da bist.', 'Kein Rückstau, keine Liste von Verpasstem. Heute ist ein frischer, leerer Tag.')}
+  <div class="sheet-illu">${illu('sunrise')}</div>
   <div class="field"><span class="lbl">Womit fangen wir an?</span>
-  <div class="sugg" style="max-width:none">${sg.map(t => { const i = initById(t.initiative); return `<button data-a="takeToday" data-id="${t.id}"><span class="em" style="--c:${i ? cvar(i.color) : 'var(--ink-3)'}">${i ? esc(i.icon) : ic('sparkle')}</span><span>${esc(t.title)}</span><span class="m">${taskMin(t)} Min</span></button>`; }).join('') || '<p class="muted">Alles leer. Fang mit dem an, was gerade im Kopf ist.</p>'}</div></div>
+  <div class="sugg" style="max-width:none">${sg.map(t => { const i = initById(t.initiative); return `<button data-a="takeToday" data-id="${t.id}"><span class="em" style="--c:${i ? cvar(i.color) : 'var(--ink-3)'}">${i ? iIcon(i) : ic('sparkle')}</span><span>${esc(t.title)}</span><span class="m">${taskMin(t)} Min</span></button>`; }).join('') || '<p class="muted">Alles leer. Fang mit dem an, was gerade im Kopf ist.</p>'}</div></div>
   <div class="row end"><button class="btn" data-a="capture">${ic('mic')} Was ist gerade im Kopf?</button><button class="btn primary" data-a="close">Los geht's</button></div>`;
 };
 
@@ -955,12 +979,12 @@ sheets.suggestOne = () => {
 };
 
 sheets.initEdit = d => {
-  const i = d.id ? initById(d.id) : { name: '', icon: '✨', color: COLORS[S.initiatives.length % COLORS.length], why: '' };
-  const emojis = ['✨', '💼', '🌿', '🏠', '📄', '📚', '🎨', '💬', '🎵', '🏃', '🧘', '💰', '🌱', '🔧', '✈️', '❤️'];
+  const i = d.id ? initById(d.id) : { name: '', icon: 'sparkle', color: COLORS[S.initiatives.length % COLORS.length], why: '' };
+  const cur = iKey(i);
   return `${sheetHead(d.id ? 'Initiative bearbeiten' : 'Neue Initiative', 'Ein Bereich, der dir wichtig ist. Kein Projektplan nötig.')}
   <form id="init-form" class="stack" data-id="${d.id || ''}">
     <div class="field"><label for="i-name">Name</label><input id="i-name" class="input" name="name" value="${esc(i.name)}" required placeholder="z. B. Masterarbeit" ${d.id ? '' : 'autofocus'}></div>
-    <div class="field"><span class="lbl">Symbol</span><div class="row" style="gap:4px">${emojis.map(e => `<label class="chip plain" style="cursor:pointer;font-size:20px;padding:4px 8px"><input type="radio" name="icon" value="${e}" ${i.icon === e ? 'checked' : ''} class="sr">${e}</label>`).join('')}</div></div>
+    <div class="field"><span class="lbl">Symbol</span><div class="row" style="gap:4px">${INIT_ICONS.map(e => `<label class="icon-pick" style="--c:${cvar(i.color)}"><input type="radio" name="icon" value="${e}" ${cur === e ? 'checked' : ''} class="sr" aria-label="${e}">${ic(e)}</label>`).join('')}</div></div>
     <div class="field"><span class="lbl">Farbe</span><div class="row" style="gap:8px">${COLORS.map(c => `<label style="cursor:pointer"><input type="radio" name="color" value="${c}" ${i.color === c ? 'checked' : ''} class="sr"><span class="color-sw" style="display:inline-block;width:34px;height:34px;border-radius:50%;background:${cvar(c)};box-shadow:${i.color === c ? '0 0 0 3px var(--surface),0 0 0 5px var(--ink)' : 'none'}"></span></label>`).join('')}</div></div>
     <div class="field"><label for="i-why">Warum ist mir das wichtig?</label><input id="i-why" class="input" name="why" value="${esc(i.why || '')}" placeholder="z. B. Damit ich im Sommer fertig bin und reisen kann"><span class="help">Wird im Fokusmodus angezeigt. Ein fernes Ziel motiviert besser, wenn man es sieht.</span></div>
     <label class="toggle"><span class="tx"><b>Fokus-Initiative</b><small>Vorschläge kommen zuerst von hier. Nur eine gleichzeitig.</small></span><input type="checkbox" class="switch" name="focus" ${i.focus ? 'checked' : ''}></label>
@@ -1024,7 +1048,7 @@ function onboarding() {
     <div class="choice">${PROBLEMS.map(x => `<button data-a="onbProblem" data-v="${x.id}" aria-pressed="${onb.problem === x.id}"><span class="em">${ic(x.em)}</span><b>${x.t}</b><small>${x.d}</small></button>`).join('')}</div></div>
     <div class="row between"><button class="btn ghost" data-a="demo">${ic('sparkle')} Beispieltag ansehen</button><button class="btn primary big" data-a="onbNext" ${onb.problem ? '' : 'disabled'}>Weiter ${ic('arrow')}</button></div>`;
   if (onb.step === 1) body = `<div class="onb-hero"><span class="eyebrow">Initiativen</span><h2>Worauf willst du dich konzentrieren?</h2><p>Wähle 2 bis 4 Bereiche. Keine Ordner, keine Unterprojekte. Du kannst sie später umbenennen.</p></div>
-    <div class="preset-grid">${PRESETS.map((x, k) => `<button data-a="onbPick" data-k="${k}" aria-pressed="${onb.picks.includes(k)}" style="--c:${cvar(x.color)}"><span class="em" style="--c:${cvar(x.color)}">${x.icon}</span>${esc(x.name)}</button>`).join('')}</div>
+    <div class="preset-grid">${PRESETS.map((x, k) => `<button data-a="onbPick" data-k="${k}" aria-pressed="${onb.picks.includes(k)}" style="--c:${cvar(x.color)}"><span class="em" style="--c:${cvar(x.color)}">${ic(x.icon)}</span>${esc(x.name)}</button>`).join('')}</div>
     <div class="row between"><button class="btn ghost" data-a="onbBack">Zurück</button><button class="btn primary big" data-a="onbNext" ${onb.picks.length ? '' : 'disabled'}>Weiter ${ic('arrow')}</button></div>`;
   if (onb.step === 2) body = `<div class="onb-hero"><span class="eyebrow">Brain-Dump</span><h2>Sag mir alles, was dir im Kopf herumschwirrt.</h2><p>Durcheinander ist okay. Komma oder neue Zeile trennt die Dinge. Ich sortiere und zerlege in kleine Schritte.</p></div>
     <textarea id="onb-dump" class="input" style="min-height:160px" placeholder="Steuer anfangen, Zahnarzt um 16:30, Wäsche, Mama zurückrufen 10 min, Bewerbung schreiben">${esc(onb.dump)}</textarea>
@@ -1034,10 +1058,10 @@ function onboarding() {
     <div class="onb-preview ${onb.notify === 'sanft' ? 'gentle' : ''}"><span class="eyebrow">Vorschau</span><div>${onb.notify === 'sanft' ? 'Bereit für den nächsten kleinen Schritt?' : onb.notify === 'normal' ? 'In 10 Minuten: Zahnarzt. Zeit für den Übergang.' : 'Noch dabei bei „Steuer“? Weitermachen, Pause oder neu planen?'}</div><div class="row"><button class="btn small ${onb.notify === 'sanft' ? '' : 'now'}" tabindex="-1">Starten</button><button class="btn small" tabindex="-1">5 Min später</button></div></div>
     <div class="row between"><button class="btn ghost" data-a="onbBack">Zurück</button><button class="btn now big" data-a="onbFinish">${ic('play')} Los geht's</button></div>`;
   return `<div class="onb">
-    <aside class="onb-art"><div class="brand">${MARK}<span>Jetzt<i>.</i></span></div>${onbArt()}
+    <aside class="onb-art"><div class="brand">${MARK}<span>Jetzt<i>.</i></span></div>${onb.step === 0 ? onbArt() : `<div class="art-wrap">${illu(['', 'paths', 'dump', 'bell'][onb.step])}</div>`}
       <div><blockquote>Die App übernimmt die Selbststeuerung. Du bestätigst nur.</blockquote>
       <ul><li>${ic('check')} Ein nächster Schritt statt einer Liste</li><li>${ic('check')} Zeit wird sichtbar, nicht abstrakt</li><li>${ic('check')} Neustart ohne Schuld, kein „überfällig“</li></ul></div></aside>
-    <div class="onb-main"><div class="onb-card"><div class="onb-top"><div class="brand">${MARK}<span>Jetzt<i>.</i></span></div>${dots}</div>${body}</div></div></div>`;
+    <div class="onb-main"><div class="onb-card"><div class="onb-top"><div class="brand">${MARK}<span>Jetzt<i>.</i></span></div>${dots}</div><div class="onb-illu">${illu(['sunrise', 'paths', 'dump', 'bell'][onb.step])}</div>${body}</div></div></div>`;
 }
 function applyProblem(p) {
   S.profile.problem = p;
@@ -1158,7 +1182,7 @@ document.addEventListener('click', e => {
     }
     case 'dropNote': S.notes = S.notes.filter(n => n.id !== id); save(); render(); break;
     case 'askSomeone': { const t = taskById(id); if (t) { t.steps.unshift({ id: uid(), text: `Kurze Nachricht schreiben: „Kannst du mir bei ${t.title} helfen?“`, min: 3, done: false }); t.status = 'today'; t.date = T(); t.order = -Date.now(); } sheet = null; save(); render(); toast('Neuer erster Schritt: um Hilfe fragen. Das ist kein Aufgeben, das ist klug.', { gentle: true }); break; }
-    case 'initGo': { const i = initById(id); const tasks = S.tasks.filter(t => t.initiative === id && t.type === 'task' && t.status !== 'done'); const t = tasks.find(x => x.status === 'today') || tasks[0]; if (t) { t.status = 'today'; t.date = T(); t.order = -Date.now(); if (!t.steps.length) t.steps = breakdown(t.title, S.profile.detail); S.ui.view = 'jetzt'; save(); render(); window.scrollTo(0, 0); toast(`${i.icon} ${i.name}: „${t.title}“ steht jetzt oben.`, { gentle: true }); } break; }
+    case 'initGo': { const i = initById(id); const tasks = S.tasks.filter(t => t.initiative === id && t.type === 'task' && t.status !== 'done'); const t = tasks.find(x => x.status === 'today') || tasks[0]; if (t) { t.status = 'today'; t.date = T(); t.order = -Date.now(); if (!t.steps.length) t.steps = breakdown(t.title, S.profile.detail); S.ui.view = 'jetzt'; save(); render(); window.scrollTo(0, 0); toast(`${i.name}: „${t.title}“ steht jetzt oben.`, { gentle: true }); } break; }
     case 'delInit': S.initiatives = S.initiatives.filter(i => i.id !== id); S.tasks.forEach(t => { if (t.initiative === id) t.initiative = null; }); sheet = null; save(); render(); break;
     case 'runRoutine': { const r = S.routines.find(x => x.id === id); if (!r || !r.steps.length) break; S.focus = { routine: true, routineId: id, idx: 0, total: r.steps[0].min * 60, elapsed: 0, since: Date.now(), paused: false }; ctx(); holdWake(); save(); render(); break; }
     case 'rNext': case 'rSkip': {
@@ -1231,7 +1255,7 @@ document.addEventListener('change', e => {
   if (el.dataset.set) { if (parseHM(el.value) != null) { S.profile[el.dataset.set] = el.value; save(); } }
   if (el.closest('#init-form') && (el.name === 'icon' || el.name === 'color')) {
     const f = el.closest('#init-form'); f.querySelectorAll('.color-sw').forEach(sw => { const inp = sw.previousElementSibling; sw.style.boxShadow = inp.checked ? '0 0 0 3px var(--surface),0 0 0 5px var(--ink)' : 'none'; });
-    f.querySelectorAll('input[name=icon]').forEach(inp => { inp.parentElement.style.background = inp.checked ? 'var(--ink)' : ''; });
+    f.querySelectorAll('input[name=icon]').forEach(inp => { inp.parentElement.classList.toggle('on', inp.checked); });
   }
 });
 document.addEventListener('submit', e => {
@@ -1251,7 +1275,7 @@ document.addEventListener('submit', e => {
     const id = f.dataset.id; const name = (fd.get('name') || '').trim(); if (!name) return;
     let i = id ? initById(id) : null;
     if (!i) { i = { id: uid(), grown: 0, kw: [] }; S.initiatives.push(i); }
-    i.name = name; i.icon = fd.get('icon') || '✨'; i.color = fd.get('color') || 'sage'; i.why = (fd.get('why') || '').trim();
+    i.name = name; i.icon = fd.get('icon') || 'sparkle'; i.color = fd.get('color') || 'sage'; i.why = (fd.get('why') || '').trim();
     const foc = !!fd.get('focus'); if (foc) S.initiatives.forEach(x => { x.focus = false; }); i.focus = foc;
     const pre = PRESETS.find(p => name.toLowerCase().includes(p.name.split(' ')[0].toLowerCase())); if (pre && !(i.kw || []).length) i.kw = pre.kw;
     sheet = null; save(); render();

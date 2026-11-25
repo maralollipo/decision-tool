@@ -42,6 +42,7 @@ Tastatur: `n` öffnet „Erfassen“, `Leertaste` startet den Fokus, `Strg/Cmd +
 - `index.html`: Einstieg
 - `styles.css`: Design-Tokens (Geist-Schrift) (hell/dunkel), Layout, reizarmer Modus
 - `app.js`: gesamte App-Logik
+- `illustrations.js`: eigene Zeichnungen (Schreibtisch, Gipfel, Nacht, Kiste, Sonnenaufgang, Wege, Gedankenwolke, Glocke, Trittsteine)
 - `manifest.webmanifest`, `sw.js`, `icon.svg`: PWA
 
 > Jetzt. ist eine Alltagsstütze und ersetzt keine Diagnostik, Medikation oder Therapie.
